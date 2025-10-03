@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import "../assets/Login.css";
-import { api } from "../services/api";
+import axios from "axios"; 
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState(""); // or email
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -14,15 +14,26 @@ const Login = () => {
     setError("");
 
     try {
-      const res = await api.post("/api/login/", { email, password });
+      const res = await axios.post("http://127.0.0.1:8000/api/login/", {
+        username,
+        password,
+      });
+
       if (res.data.success) {
+        // Save token to localStorage
         localStorage.setItem("token", res.data.token);
-        navigate("/"); // redirect to dashboard
+
+        // Redirect to dashboard after login
+        navigate("/dashboard");
       } else {
         setError(res.data.message || "Invalid credentials");
       }
     } catch (err) {
-      setError("Login failed. Please try again.");
+      if (err.response && err.response.status === 401) {
+        setError("Invalid username or password");
+      } else {
+        setError("Login failed. Please try again.");
+      }
       console.error(err);
     }
   };
@@ -33,10 +44,10 @@ const Login = () => {
       {error && <div className="error-message">{error}</div>}
       <form onSubmit={handleSubmit}>
         <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
         />
         <input
