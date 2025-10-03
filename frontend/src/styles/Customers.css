@@ -1,0 +1,18 @@
+.customers-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.customers-container h1 {
+  color: #34495e;
+}
+
+.customers-container ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.customers-container li {
+  padding: 8px 0;
+  border-bottom: 1px solid #ddd;
+}

@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* small admin overrides */
+.admin-sidebar { @apply bg-gray-800 text-white min-h-screen w-64; }
+.admin-topbar { @apply bg-white border-b p-3 flex items-center justify-between; }
+.admin-main { @apply p-6 bg-gray-50 min-h-screen; }

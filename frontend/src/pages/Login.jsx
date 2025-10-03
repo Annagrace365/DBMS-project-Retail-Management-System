@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../assets/Login.css";
+import "../styles/Login.css";
 import axios from "axios"; 
 import { useNavigate } from "react-router-dom";
 
@@ -24,7 +24,7 @@ const Login = () => {
         localStorage.setItem("token", res.data.token);
 
         // Redirect to dashboard after login
-        navigate("/dashboard");
+        navigate("/admin");
       } else {
         setError(res.data.message || "Invalid credentials");
       }
