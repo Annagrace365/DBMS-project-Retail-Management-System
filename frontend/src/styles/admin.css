@@ -1,8 +1,21 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* src/styles/admin.css */
+/* Import tailwind base if you maintain a separate admin build.
+   If you already have tailwind in index.css, do NOT re-import base utilities here.
+   Instead just include admin overrides below. */
 
-/* small admin overrides */
+/* Admin specific overrides & utility helpers */
 .admin-sidebar { @apply bg-gray-800 text-white min-h-screen w-64; }
 .admin-topbar { @apply bg-white border-b p-3 flex items-center justify-between; }
 .admin-main { @apply p-6 bg-gray-50 min-h-screen; }
+
+/* Small tweaks */
+.table-sm td, .table-sm th { @apply text-sm; }
+.kpi { @apply p-4 bg-white rounded shadow text-center; }
+.card { @apply bg-white rounded shadow p-4; }
+
+/* If not using tailwind, provide fallback styles */
+@layer components {
+  .admin-sidebar { color: #fff; background: #2d3748; }
+  .admin-topbar { background: #fff; border-bottom: 1px solid #e5e7eb; }
+  .admin-main { background: #f9fafb; }
+}

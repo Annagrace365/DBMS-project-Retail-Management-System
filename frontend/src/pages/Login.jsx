@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// src/pages/Login.jsx
+import React, { useState, useEffect } from "react";
 import "../styles/Login.css";
 import axios from "axios"; 
 import { useNavigate } from "react-router-dom";
@@ -8,6 +9,14 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  // If already logged in, go to admin
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/admin");
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,7 +32,7 @@ const Login = () => {
         // Save token to localStorage
         localStorage.setItem("token", res.data.token);
 
-        // Redirect to dashboard after login
+        // Redirect to admin dashboard
         navigate("/admin");
       } else {
         setError(res.data.message || "Invalid credentials");
