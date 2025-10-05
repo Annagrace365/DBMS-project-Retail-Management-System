@@ -1,33 +1,14 @@
 // src/pages/admin/services/adminApi.jsx
 import axios from "axios";
 
-/**
- * Robust environment-aware base URL:
- * - Vite : import.meta.env.VITE_API_BASE
- * - CRA  : process.env.REACT_APP_API_BASE (if you later use CRA)
- * - Fallback to '/api'
- */
-const getBaseUrl = () => {
-  // Vite
-  if (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_BASE) {
-    return import.meta.env.VITE_API_BASE;
-  }
-
-  // CRA or other bundlers that expose process.env (only available in CRA)
-  if (typeof process !== "undefined" && process.env && process.env.REACT_APP_API_BASE) {
-    return process.env.REACT_APP_API_BASE;
-  }
-
-  // Fallback
-  return "/api";
-};
+const BASE_URL = "http://127.0.0.1:8000/api";
 
 const api = axios.create({
-  baseURL: getBaseUrl(),
+  baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },
 });
 
-// Attach token automatically if present
+// Attach token automatically if present (for protected endpoints)
 api.interceptors.request.use((config) => {
   try {
     const token = localStorage.getItem("token");
@@ -41,11 +22,12 @@ api.interceptors.request.use((config) => {
   return config;
 }, (error) => Promise.reject(error));
 
-// central admin API surface (extend as needed)
 export const adminApi = {
-  // Dashboard KPIs
+  // Dashboard KPIs — ignore token
   async getKpis() {
-    const { data } = await api.get("/admin/kpis");
+    const { data } = await api.get("/admin/kpis", {
+      headers: { Authorization: undefined }, // do NOT send token
+    });
     return data;
   },
 
@@ -89,7 +71,7 @@ export const adminApi = {
     return data;
   },
 
-  // Stubs for pages you created earlier (safe if backend not ready)
+  // Other stubs
   async listSuppliers(params) {
     const { data } = await api.get("/admin/suppliers", { params });
     return data;
