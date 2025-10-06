@@ -1,17 +1,26 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
 import Table from "../components/ui/Table";
-import { adminApi } from "../services/adminApi";
+import api from "../services/adminApi"; // use default api
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    adminApi.listCustomers().then((data) => {
+  const fetchCustomers = async () => {
+    setLoading(true);
+    try {
+      const data = await api.listCustomers();
       setCustomers(data || []);
+    } catch (err) {
+      console.error("Failed to fetch customers:", err);
+    } finally {
       setLoading(false);
-    }).catch(()=>setLoading(false));
+    }
+  };
+
+  useEffect(() => {
+    fetchCustomers();
   }, []);
 
   const columns = [
@@ -22,21 +31,33 @@ export default function CustomersPage() {
     { key: "last_order_date", title: "Last Order", render: (r) => r.last_order_date || "-" },
   ];
 
+  // Example: addCustomer handler (optional)
+  const handleAddCustomer = async () => {
+    const name = prompt("Enter customer name:");
+    if (!name) return;
+    const phone = prompt("Enter phone:");
+    const email = prompt("Enter email:");
+
+    try {
+      await api.createCustomer({ name, phone, email });
+      fetchCustomers(); // refresh table
+    } catch (err) {
+      console.error("Failed to add customer:", err);
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">Customers</h2>
-        <div>
-          <button className="px-3 py-2 bg-blue-600 text-white rounded">Add Customer</button>
-        </div>
+        
       </div>
 
-      <Table columns={columns} data={loading ? [] : customers} renderRowActions={(row) => (
-        <div className="flex gap-2">
-          <button className="text-sm px-2 py-1 border rounded">View</button>
-          <button className="text-sm px-2 py-1 border rounded">Edit</button>
-        </div>
-      )} />
+      <Table
+        columns={columns}
+        data={loading ? [] : customers}
+        
+      />
     </AdminLayout>
   );
 }

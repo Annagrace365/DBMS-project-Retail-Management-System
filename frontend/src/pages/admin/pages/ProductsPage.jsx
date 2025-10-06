@@ -5,9 +5,13 @@ import { adminApi } from "../services/adminApi";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    adminApi.listProducts().then((d)=>setProducts(d || []));
+    adminApi.listProducts()
+      .then((d) => setProducts(d || []))
+      .catch((err) => console.error("Failed to fetch products:", err))
+      .finally(() => setLoading(false));
   }, []);
 
   const columns = [
@@ -27,12 +31,20 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      <Table columns={columns} data={products} renderRowActions={(row)=>(
-        <div className="flex gap-2">
-          <button className="px-2 py-1 border rounded">Edit</button>
-          <button className="px-2 py-1 border rounded">Adjust Stock</button>
-        </div>
-      )} />
+      {loading ? (
+        <div>Loading products...</div>
+      ) : (
+        <Table
+          columns={columns}
+          data={products}
+          renderRowActions={(row) => (
+            <div className="flex gap-2">
+              <button className="px-2 py-1 border rounded">Edit</button>
+              <button className="px-2 py-1 border rounded">Adjust Stock</button>
+            </div>
+          )}
+        />
+      )}
     </AdminLayout>
   );
 }

@@ -5,10 +5,13 @@ import { adminApi } from "../services/adminApi";
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Replace with actual API later
-    adminApi.listSuppliers?.().then((d) => setSuppliers(d || []));
+    adminApi.listSuppliers()
+      .then((d) => setSuppliers(d || []))
+      .catch((err) => console.error("Failed to fetch suppliers:", err))
+      .finally(() => setLoading(false));
   }, []);
 
   const columns = [
@@ -27,16 +30,20 @@ export default function SuppliersPage() {
         </button>
       </div>
 
-      <Table
-        columns={columns}
-        data={suppliers}
-        renderRowActions={(row) => (
-          <div className="flex gap-2">
-            <button className="px-2 py-1 border rounded">Edit</button>
-            <button className="px-2 py-1 border rounded">Delete</button>
-          </div>
-        )}
-      />
+      {loading ? (
+        <div>Loading suppliers...</div>
+      ) : (
+        <Table
+          columns={columns}
+          data={suppliers}
+          renderRowActions={(row) => (
+            <div className="flex gap-2">
+              <button className="px-2 py-1 border rounded">Edit</button>
+              <button className="px-2 py-1 border rounded">Delete</button>
+            </div>
+          )}
+        />
+      )}
     </AdminLayout>
   );
 }
