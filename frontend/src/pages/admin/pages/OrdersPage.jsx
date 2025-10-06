@@ -1,21 +1,33 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
 import Table from "../components/ui/Table";
-import { adminApi } from "../services/adminApi";
+import api from "../services/adminApi";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const data = await api.listOrders();
+      setOrders(data || []);
+    } catch (err) {
+      console.error("Failed to fetch orders:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    adminApi.listOrders().then((d) => setOrders(d || []));
+    fetchOrders();
   }, []);
 
-  const cols = [
-    { key: "order_number", title: "Order #" },
-    { key: "customer_name", title: "Customer", render: r => r.customer_name || "-" },
-    { key: "total", title: "Total", render: r => `₹ ${r.total}` },
-    { key: "status", title: "Status" },
-    { key: "created_at", title: "Date" },
+  const columns = [
+    { key: "order_number", title: "Order #", render: (r) => r.order_number },
+    { key: "customer_name", title: "Customer", render: (r) => r.customer_name || "-" },
+    { key: "total", title: "Total", render: (r) => `₹ ${r.total}` },
+    { key: "created_at", title: "Date", render: (r) => new Date(r.created_at).toLocaleDateString() },
   ];
 
   return (
@@ -27,12 +39,16 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      <Table columns={cols} data={orders} renderRowActions={(row) => (
-        <div className="flex gap-2">
-          <button className="px-2 py-1 border rounded">View</button>
-          <button className="px-2 py-1 border rounded">Invoice</button>
-        </div>
-      )} />
+      <Table
+        columns={columns}
+        data={loading ? [] : orders}
+        renderRowActions={(row) => (
+          <div className="flex gap-2">
+            <button className="px-2 py-1 border rounded">View</button>
+            <button className="px-2 py-1 border rounded">Invoice</button>
+          </div>
+        )}
+      />
     </AdminLayout>
   );
 }

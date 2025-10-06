@@ -5,9 +5,13 @@ import { adminApi } from "../services/adminApi";
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    adminApi.listPayments?.().then((d) => setPayments(d || []));
+    adminApi.listPayments()
+      .then((d) => setPayments(d || []))
+      .catch((err) => console.error("Failed to fetch payments:", err))
+      .finally(() => setLoading(false));
   }, []);
 
   const columns = [
@@ -21,16 +25,21 @@ export default function PaymentsPage() {
   return (
     <AdminLayout>
       <h2 className="text-xl font-semibold mb-4">Payments</h2>
-      <Table
-        columns={columns}
-        data={payments}
-        renderRowActions={(row) => (
-          <div className="flex gap-2">
-            <button className="px-2 py-1 border rounded">View</button>
-            <button className="px-2 py-1 border rounded">Refund</button>
-          </div>
-        )}
-      />
+
+      {loading ? (
+        <div>Loading payments...</div>
+      ) : (
+        <Table
+          columns={columns}
+          data={payments}
+          renderRowActions={(row) => (
+            <div className="flex gap-2">
+              <button className="px-2 py-1 border rounded">View</button>
+              <button className="px-2 py-1 border rounded">Refund</button>
+            </div>
+          )}
+        />
+      )}
     </AdminLayout>
   );
 }

@@ -31,37 +31,14 @@ export const adminApi = {
     return data;
   },
 
-  // Customers
-  async listCustomers(params) {
-    const { data } = await api.get("/admin/customers", { params });
-    return data;
-  },
-  async getCustomer(id) {
-    const { data } = await api.get(`/admin/customers/${id}`);
-    return data;
-  },
-  async createCustomer(payload) {
-    const { data } = await api.post(`/admin/customers`, payload);
-    return data;
-  },
-
-  // Orders
-  async listOrders(params) {
-    const { data } = await api.get("/admin/orders", { params });
-    return data;
-  },
-  async createOrder(payload) {
-    const { data } = await api.post("/admin/orders", payload);
-    return data;
-  },
 
   // Products
   async listProducts(params) {
-    const { data } = await api.get("/admin/products", { params });
+    const { data } = await api.get("/admin/products/", { params }); // trailing slash
     return data;
   },
   async patchProduct(id, payload) {
-    const { data } = await api.patch(`/admin/products/${id}`, payload);
+    const { data } = await api.patch(`/admin/products/${id}/`, payload);
     return data;
   },
 
@@ -73,17 +50,40 @@ export const adminApi = {
 
   // Other stubs
   async listSuppliers(params) {
-    const { data } = await api.get("/admin/suppliers", { params });
-    return data;
-  },
+  const { data } = await api.get("/admin/suppliers/", { params });
+  return data;
+ },
   async listPayments(params) {
-    const { data } = await api.get("/admin/payments", { params });
-    return data;
-  },
+  const { data } = await api.get("/admin/payments/", { params });
+  return data;
+},
   async listAuditLogs(params) {
     const { data } = await api.get("/admin/audit", { params });
     return data;
   },
 };
 
+
+
 export default api;
+
+
+// ---------------- Customers CRUD ----------------
+// ---------------- Customers CRUD ----------------
+api.listCustomers = async function (params) {
+  // params can include { search: "Alice" }
+  const { data } = await api.get("/admin/customers/", { params });
+  return data;
+};
+
+
+// ---------------- Orders ----------------
+api.listOrders = async function (params) {
+  const { data } = await api.get("/admin/orders/", { params });
+  return data;
+};
+
+api.getOrder = async function (id) {
+  const { data } = await api.get(`/admin/orders/${id}/`);
+  return data;
+};
