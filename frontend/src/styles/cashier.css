@@ -1,0 +1,2 @@
+/* Minimal fallback styling if not using Tailwind; optional */
+body { font-family: Inter, system-ui, Arial, sans-serif; }
