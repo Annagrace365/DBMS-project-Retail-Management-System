@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "./pages/Login";
 import AdminRoutes from "./pages/admin/routes/AdminRoutes.jsx";
 import RequireAuth from "./pages/admin/components/RequireAuth.jsx"; // <-- updated path
+import CashierRoutes from "./pages/cashier/routes/CashierRoutes.jsx";
 
 function App() {
   return (
@@ -19,6 +20,13 @@ function App() {
             <RequireAuth>
               <AdminRoutes />
             </RequireAuth>
+          }
+        />
+
+        <Route
+          path="/cashier/*"
+          element={
+              <CashierRoutes />
           }
         />
       </Routes>
