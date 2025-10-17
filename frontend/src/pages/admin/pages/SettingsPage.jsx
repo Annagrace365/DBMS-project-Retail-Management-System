@@ -2,37 +2,58 @@ import React from "react";
 import AdminLayout from "../components/layout/AdminLayout";
 
 export default function SettingsPage() {
+  const handleAction = (type) => {
+    // Placeholder: implement edit/manage/configure functionality
+    alert(`${type} clicked!`);
+  };
+
   return (
     <AdminLayout>
-      <h2 className="text-xl font-semibold mb-6">Settings</h2>
+      {/* Page Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold">Settings</h2>
+      </div>
 
-      <div className="space-y-4">
-        <section className="bg-white p-4 rounded shadow">
+      {/* Settings Sections */}
+      <div className="space-y-6">
+        {/* System Parameters */}
+        <section className="card">
           <h3 className="text-lg font-medium">System Parameters</h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 mt-1">
             Configure tax rates, currency, and low-stock thresholds.
           </p>
-          <button className="mt-2 px-3 py-2 bg-blue-600 text-white rounded">
+          <button
+            className="btn-settings-action mt-3"
+            onClick={() => handleAction("Edit Parameters")}
+          >
             Edit Parameters
           </button>
         </section>
-
-        <section className="bg-white p-4 rounded shadow">
+        <br></br>
+        {/* Role Management */}
+        <section className="card">
           <h3 className="text-lg font-medium">Role Management</h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 mt-1">
             Add or update user roles (Admin, Staff, Inventory Manager).
           </p>
-          <button className="mt-2 px-3 py-2 bg-blue-600 text-white rounded">
+          <button
+            className="btn-settings-action mt-3"
+            onClick={() => handleAction("Manage Roles")}
+          >
             Manage Roles
           </button>
         </section>
-
-        <section className="bg-white p-4 rounded shadow">
+        <br></br>
+        {/* Device Integration */}
+        <section className="card">
           <h3 className="text-lg font-medium">Device Integration</h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 mt-1">
             Manage barcode scanner and printer settings.
           </p>
-          <button className="mt-2 px-3 py-2 bg-blue-600 text-white rounded">
+          <button
+            className="btn-settings-action mt-3"
+            onClick={() => handleAction("Configure Devices")}
+          >
             Configure Devices
           </button>
         </section>

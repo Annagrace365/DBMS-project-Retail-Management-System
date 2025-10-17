@@ -1,5 +1,7 @@
 // src/pages/cashier/components/CashierLayout.jsx
 import React from "react";
+// add import for scoped CSS so rules apply
+import "../../../styles/cashier.css";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
@@ -11,26 +13,30 @@ import { CashierProvider } from "./CashierContext";
  * - Wraps children with CashierProvider so pages share cart/session state
  * - Renders <Outlet /> where route-specific pages mount
  */
-export default function CashierLayout() {
+export default function CashierLayout({ children }) {
   return (
-    <CashierProvider>
-      <div style={styles.outer}>
-        <aside style={styles.sidebar}>
-          <Sidebar />
-        </aside>
+    // ensure root has the class your CSS targets
+    <div className="cashier-root cashier-layout" data-area="cashier">
+      <CashierProvider>
+        <div style={styles.outer}>
+          <aside className="cashier-sidebar" style={styles.sidebar}>
+            <Sidebar />
+          </aside>
 
-        <div style={styles.mainArea}>
-          <header style={styles.topbar}>
-            <Topbar />
-          </header>
+          <div style={styles.mainArea}>
+            <header className="cashier-topbar" style={styles.topbar}>
+              <Topbar />
+            </header>
 
-          <main style={styles.content}>
-            {/* Route-specific pages render here */}
-            <Outlet />
-          </main>
+            <main style={styles.content}>
+              {/* Route-specific pages render here */}
+              <Outlet />
+            </main>
+          </div>
         </div>
-      </div>
-    </CashierProvider>
+      </CashierProvider>
+      {children}
+    </div>
   );
 }
 

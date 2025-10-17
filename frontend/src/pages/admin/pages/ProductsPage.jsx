@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
-import Table from "../components/ui/Table";
 import { adminApi } from "../services/adminApi";
 
 export default function ProductsPage() {
@@ -14,37 +13,62 @@ export default function ProductsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const columns = [
-    { key: "sku", title: "SKU" },
-    { key: "name", title: "Name" },
-    { key: "price", title: "Price", render: r => `₹ ${r.price}` },
-    { key: "stock", title: "Stock" },
-    { key: "supplier", title: "Supplier", render: r => r.supplier_name || "-" },
-  ];
+  // Add Product handler
+  const handleAddProduct = () => {
+    // You can implement modal or redirect to add product page
+    alert("Add Product clicked!");
+  };
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Products</h2>
-        <div>
-          <button className="px-3 py-2 bg-blue-600 text-white rounded">Add Product</button>
+      {/* Header */}
+      <div className="flex items-center mb-6 w-full">
+        <h2 className="text-2xl font-semibold">Products</h2>
+        <div className="ml-auto">
+          <button onClick={handleAddProduct} className="btn-add-product">
+            + Add Product
+          </button>
         </div>
       </div>
 
-      {loading ? (
-        <div>Loading products...</div>
-      ) : (
-        <Table
-          columns={columns}
-          data={products}
-          renderRowActions={(row) => (
-            <div className="flex gap-2">
-              <button className="px-2 py-1 border rounded">Edit</button>
-              <button className="px-2 py-1 border rounded">Adjust Stock</button>
-            </div>
-          )}
-        />
-      )}
+      {/* Products Table */}
+      <div className="card">
+        {loading ? (
+          <div className="loading">Loading products...</div>
+        ) : products.length > 0 ? (
+          <table className="card-table">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Supplier</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.map((p) => (
+                <tr key={p.id}>
+                  <td>{p.sku}</td>
+                  <td>{p.name}</td>
+                  <td>₹ {p.price}</td>
+                  <td>{p.stock}</td>
+                  <td>{p.supplier_name || "-"}</td>
+                  <td>
+                    <div className="flex gap-2">
+                      <button className="btn-row-action">Edit</button>
+                      <button className="btn-row-action">Adjust Stock</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-gray-500 text-sm mt-2">No products found</div>
+        )}
+      </div>
     </AdminLayout>
   );
 }

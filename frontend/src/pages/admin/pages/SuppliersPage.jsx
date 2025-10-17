@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
-import Table from "../components/ui/Table";
 import { adminApi } from "../services/adminApi";
 
 export default function SuppliersPage() {
@@ -14,36 +13,59 @@ export default function SuppliersPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const columns = [
-    { key: "name", title: "Supplier Name" },
-    { key: "contact", title: "Contact" },
-    { key: "phone", title: "Phone" },
-    { key: "email", title: "Email" },
-  ];
+  const handleAddSupplier = () => {
+    // Open modal or navigate to add supplier page
+    alert("Add Supplier clicked!");
+  };
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Suppliers</h2>
-        <button className="px-3 py-2 bg-blue-600 text-white rounded">
-          Add Supplier
-        </button>
+      {/* Header */}
+      <div className="flex items-center mb-6 w-full">
+        <h2 className="text-2xl font-semibold">Suppliers</h2>
+        <div className="ml-auto">
+          <button onClick={handleAddSupplier} className="btn-add-supplier">
+            + Add Supplier
+          </button>
+        </div>
       </div>
 
-      {loading ? (
-        <div>Loading suppliers...</div>
-      ) : (
-        <Table
-          columns={columns}
-          data={suppliers}
-          renderRowActions={(row) => (
-            <div className="flex gap-2">
-              <button className="px-2 py-1 border rounded">Edit</button>
-              <button className="px-2 py-1 border rounded">Delete</button>
-            </div>
-          )}
-        />
-      )}
+      {/* Suppliers Table */}
+      <div className="card">
+        {loading ? (
+          <div className="loading">Loading suppliers...</div>
+        ) : suppliers.length > 0 ? (
+          <table className="card-table">
+            <thead>
+              <tr>
+                <th>Supplier Name</th>
+                <th>Contact</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {suppliers.map((s) => (
+                <tr key={s.id}>
+                  <td>{s.name}</td>
+                  <td>{s.contact || "-"}</td>
+                  <td>{s.phone || "-"}</td>
+                  <td>{s.email || "-"}</td>
+                  <td>
+                    <div className="flex gap-2">
+                      <button className="btn-row-action">Edit</button>
+                      <button className="btn-row-action">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-gray-500 text-sm mt-2">No suppliers found</div>
+        )}
+      </div>
     </AdminLayout>
   );
 }
