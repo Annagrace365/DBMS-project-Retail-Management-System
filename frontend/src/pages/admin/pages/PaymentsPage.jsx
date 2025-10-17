@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
-import Table from "../components/ui/Table";
 import { adminApi } from "../services/adminApi";
 
 export default function PaymentsPage() {
@@ -14,32 +13,53 @@ export default function PaymentsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const columns = [
-    { key: "order_number", title: "Order #" },
-    { key: "customer_name", title: "Customer" },
-    { key: "amount", title: "Amount", render: (r) => `₹ ${r.amount}` },
-    { key: "mode", title: "Mode" },
-    { key: "date", title: "Date" },
-  ];
-
   return (
     <AdminLayout>
-      <h2 className="text-xl font-semibold mb-4">Payments</h2>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6 w-full">
+        <h2 className="text-2xl font-semibold">Payments</h2>
+        {/* Optional: Add Payment button */}
+        {/* <button className="btn-add-payment">+ Add Payment</button> */}
+      </div>
 
-      {loading ? (
-        <div>Loading payments...</div>
-      ) : (
-        <Table
-          columns={columns}
-          data={payments}
-          renderRowActions={(row) => (
-            <div className="flex gap-2">
-              <button className="px-2 py-1 border rounded">View</button>
-              <button className="px-2 py-1 border rounded">Refund</button>
-            </div>
-          )}
-        />
-      )}
+      {/* Payments Table */}
+      <div className="card">
+        {loading ? (
+          <div className="loading">Loading payments...</div>
+        ) : payments.length > 0 ? (
+          <table className="card-table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Amount</th>
+                <th>Mode</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {payments.map((p) => (
+                <tr key={p.id}>
+                  <td>{p.order_number}</td>
+                  <td>{p.customer_name || "-"}</td>
+                  <td>₹ {p.amount}</td>
+                  <td>{p.mode}</td>
+                  <td>{new Date(p.date).toLocaleDateString()}</td>
+                  <td>
+                    <div className="flex gap-2">
+                      <button className="btn-row-action">View</button>
+                      <button className="btn-row-action">Refund</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-gray-500 text-sm mt-2">No payments found</div>
+        )}
+      </div>
     </AdminLayout>
   );
 }

@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
-import KPI from "../components/ui/KPI";
-import Card from "../components/ui/Card";
 import { adminApi } from "../services/adminApi";
 
 export default function DashboardPage() {
@@ -22,7 +20,6 @@ export default function DashboardPage() {
     const fetchKpis = async () => {
       try {
         const data = await adminApi.getKpis();
-        console.log("KPIs fetched:", data); // <-- DEBUG: verify API response
         if (!mounted) return;
 
         setKpis({
@@ -41,7 +38,6 @@ export default function DashboardPage() {
     };
 
     fetchKpis();
-
     return () => {
       mounted = false;
     };
@@ -50,56 +46,90 @@ export default function DashboardPage() {
   return (
     <AdminLayout>
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <KPI label="Today's Sales" value={loading ? "..." : `₹ ${kpis.todaySales}`} />
-        <KPI label="Total Orders Today" value={loading ? "..." : kpis.totalOrdersToday} />
-        <KPI label="Low Stock Items" value={loading ? "..." : kpis.lowStockCount} />
-        <KPI label="Active Customers" value={loading ? "..." : kpis.activeCustomers} />
+      <div className="dashboard-grid kpi-grid mb-6">
+        <div className="kpi-card">
+          <div className="kpi-label">Today's Sales</div>
+          <div className="kpi-value">{loading ? "..." : `₹ ${kpis.todaySales}`}</div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-label">Total Orders Today</div>
+          <div className="kpi-value">{loading ? "..." : kpis.totalOrdersToday}</div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-label">Low Stock Items</div>
+          <div className="kpi-value">{loading ? "..." : kpis.lowStockCount}</div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-label">Active Customers</div>
+          <div className="kpi-value">{loading ? "..." : kpis.activeCustomers}</div>
+        </div>
       </div>
 
-      {/* Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* Cards Section */}
+      <div className="dashboard-grid cards-grid gap-4">
         {/* Top Products */}
-        <Card title="Top Products">
+        <div className="card">
+          <div className="card-title">Top Products</div>
           {kpis.topProducts.length > 0 ? (
-            <ol className="list-decimal pl-5">
-              {kpis.topProducts.map((p) => (
-                <li key={p.id}>
-                  {p.name} — {p.qty_sold}
-                </li>
-              ))}
-            </ol>
+            <table className="card-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Qty Sold</th>
+                </tr>
+              </thead>
+              <tbody>
+                {kpis.topProducts.map((p) => (
+                  <tr key={p.id}>
+                    <td>{p.name}</td>
+                    <td>{p.qty_sold}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           ) : (
-            <div className="text-sm text-gray-500">No top products</div>
+            <div className="text-sm text-gray-500 mt-2">No top products</div>
           )}
-        </Card>
+        </div>
 
         {/* Recent Orders */}
-        <Card title="Recent Orders">
+        <div className="card">
+          <div className="card-title">Recent Orders</div>
           {kpis.recentOrders.length > 0 ? (
-            <ul className="text-sm">
-              {kpis.recentOrders.map((o) => (
-                <li key={o.id}>
-                  {o.customer_name} — ₹ {o.amount} —{" "}
-                  {new Date(o.order_date).toLocaleDateString()}
-                </li>
-              ))}
-            </ul>
+            <table className="card-table">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {kpis.recentOrders.map((o) => (
+                  <tr key={o.id}>
+                    <td>{o.customer_name}</td>
+                    <td>₹ {o.amount}</td>
+                    <td>{new Date(o.order_date).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           ) : (
-            <div className="text-sm text-gray-500">No recent orders</div>
+            <div className="text-sm text-gray-500 mt-2">No recent orders</div>
           )}
-        </Card>
+        </div>
 
         {/* Alerts */}
-        <Card title="Alerts">
-          <ul className="text-sm">
+        <div className="card">
+          <div className="card-title">Alerts</div>
+          <ul className="text-sm mt-2">
             {kpis.lowStockCount > 0 ? (
-              <li>Low stock on {kpis.lowStockCount} products</li>
+              <li className="alert">Low stock on {kpis.lowStockCount} products</li>
             ) : (
               <li>No alerts</li>
             )}
           </ul>
-        </Card>
+        </div>
       </div>
     </AdminLayout>
   );

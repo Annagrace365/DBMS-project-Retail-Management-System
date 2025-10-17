@@ -1,2 +1,356 @@
 /* Minimal fallback styling if not using Tailwind; optional */
 body { font-family: Inter, system-ui, Arial, sans-serif; }
+
+/* Cashier button styles — scoped to cashier area.
+   Targets common possible container class names (.cashier-layout, .cashier-root, .cashier)
+   and a utility class .cashier-btn you can add to specific buttons. */
+
+/* color tokens */
+:root {
+  --cashier-primary: #2f6f9e;
+  --cashier-primary-hover: #245973;
+  --cashier-surface: #ffffff;
+  --cashier-muted: #f1f5f9;
+  --cashier-text: #213547;
+  --cashier-accent: #ffe082;
+}
+
+/* Scoped selector set to avoid touching global buttons */
+.cashier-layout button,
+.cashier-root button,
+.cashier button,
+[data-area="cashier"] button,
+button.cashier-btn,
+a.cashier-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 0;
+  background: var(--cashier-surface);
+  color: var(--cashier-text);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(33,53,71,0.06);
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease, color 120ms ease;
+  text-decoration: none; /* for anchor-as-button */
+}
+
+/* Primary / action button variant */
+button.cashier-btn.primary,
+a.cashier-btn.primary {
+  background: var(--cashier-primary);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(47,111,158,0.12);
+}
+
+/* Secondary / neutral button variant */
+button.cashier-btn.secondary,
+a.cashier-btn.secondary {
+  background: var(--cashier-muted);
+  color: var(--cashier-text);
+}
+
+/* Ghost / link style */
+button.cashier-btn.ghost,
+a.cashier-btn.ghost {
+  background: transparent;
+  color: var(--cashier-primary);
+  box-shadow: none;
+}
+
+/* Icon-only buttons */
+button.cashier-btn.icon,
+a.cashier-btn.icon {
+  padding: 8px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--cashier-surface);
+  box-shadow: 0 1px 6px rgba(33,53,71,0.06);
+}
+
+/* Hover / focus states (sleek subtle lift) */
+.cashier-layout button:hover,
+.cashier-root button:hover,
+.cashier button:hover,
+[data-area="cashier"] button:hover,
+button.cashier-btn:hover,
+a.cashier-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(33,53,71,0.12);
+}
+
+/* Specific hover for primary to keep contrast */
+button.cashier-btn.primary:hover,
+a.cashier-btn.primary:hover {
+  background: var(--cashier-primary-hover);
+  color: #fff;
+}
+
+/* Active / pressed state */
+button.cashier-btn:active,
+a.cashier-btn:active,
+.cashier-layout button:active,
+.cashier-root button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(33,53,71,0.10);
+}
+
+/* Keyboard focus - clear visible ring */
+button.cashier-btn:focus,
+a.cashier-btn:focus,
+.cashier-layout button:focus,
+.cashier-root button:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(47,111,158,0.12);
+}
+
+/* Make sure anchors used as buttons don't show underline */
+a.cashier-btn { text-decoration: none; }
+
+/* Small-screen adjustments */
+@media (max-width: 700px) {
+  button.cashier-btn,
+  a.cashier-btn,
+  .cashier-layout button,
+  .cashier-root button {
+    padding: 8px 10px;
+    font-size: 0.92rem;
+  }
+  button.cashier-btn.icon,
+  a.cashier-btn.icon { width: 36px; height: 36px; }
+}
+
+/* Sidebar: vertical menu and hover styles (scoped) */
+.cashier-root .cashier-sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 16px;
+  box-sizing: border-box;
+  background: #fff;
+  box-sizing: border-box;
+  overflow: visible;          /* allow box-shadow / pseudo-elements to be visible */
+  padding-right: 8px;        /* tightened reserve to reduce visible gap on right */
+}
+
+/* nav container (match nav, ul or direct grouping used in Sidebar.jsx) */
+.cashier-root .cashier-sidebar nav,
+.cashier-root .cashier-sidebar .menu,
+.cashier-root .cashier-sidebar .menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 0;
+}
+
+/* menu item (anchor/button) baseline style */
+.cashier-root .cashier-sidebar a,
+.cashier-root .cashier-sidebar button,
+.cashier-root .cashier-sidebar .menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: calc(100% - 8px); /* prevent items growing past sidebar edge */
+  padding: 10px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--cashier-text);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease, color 140ms ease;
+  box-shadow: none;
+  position: relative; /* for ::before accent */
+  transition: box-shadow 160ms ease, background 160ms ease, color 160ms ease, padding-left 160ms ease;
+  padding-left: 14px; /* base padding, hover will increase slightly */
+}
+
+/* remove default link underline and visited color */
+.cashier-root .cashier-sidebar a:visited {
+  color: var(--cashier-text);
+  text-decoration: none;
+}
+
+/* decorative left accent - starts hidden */
+.cashier-root .cashier-sidebar a::before,
+.cashier-root .cashier-sidebar button::before,
+.cashier-root .cashier-sidebar .menu-item::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 56%;
+  background: var(--cashier-primary);
+  border-radius: 3px;
+  transition: width 160ms ease;
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+/* hover effect: subtle lift, color accent and soft bg */
+.cashier-root .cashier-sidebar a:hover,
+.cashier-root .cashier-sidebar button:hover,
+.cashier-root .cashier-sidebar .menu-item:hover {
+  transform: translateY(-2px);             /* subtle vertical lift only */
+  background: var(--cashier-muted);
+  color: var(--cashier-primary);
+  box-shadow: 0 6px 14px rgba(33,53,71,0.06); /* tighter shadow, less horizontal spread */
+  padding-left: 14px;                      /* keep stable width */
+}
+
+/* show the accent bar on hover */
+.cashier-root .cashier-sidebar a:hover::before,
+.cashier-root .cashier-sidebar button:hover::before,
+.cashier-root .cashier-sidebar .menu-item:hover::before {
+  width: 3px; /* slimmer accent to reduce horizontal footprint */
+}
+
+/* active item (useful when NavLink adds active class) */
+.cashier-root .cashier-sidebar a.active,
+.cashier-root .cashier-sidebar .menu-item.active {
+  background: linear-gradient(90deg, rgba(47,111,158,0.08), rgba(255,224,130,0.03));
+  color: var(--cashier-primary);
+  box-shadow: 0 6px 18px rgba(47,111,158,0.06);
+}
+
+/* keyboard focus */
+.cashier-root .cashier-sidebar a:focus,
+.cashier-root .cashier-sidebar button:focus,
+.cashier-root .cashier-sidebar .menu-item:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(47,111,158,0.10);
+}
+
+/* icon-only / collapsed compatibility */
+.cashier-root .cashier-sidebar .icon-only {
+  justify-content: center;
+}
+
+/* responsive tweaks */
+@media (max-width: 800px) {
+  .cashier-root .cashier-sidebar {
+    padding: 10px;
+  }
+  .cashier-root .cashier-sidebar a,
+  .cashier-root .cashier-sidebar button {
+    padding: 9px 12px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Prevent horizontal scroll caused by hover shadows/accents.
+   Keep sidebar overflow visible for decorative shadows but hide any
+   overflow at the root so the page doesn't get a horizontal scrollbar. */
+.cashier-root {
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* Ensure sidebar can show shadows without forcing layout overflow */
+.cashier-root .cashier-sidebar {
+  box-sizing: border-box;
+  overflow: visible;       /* allow shadows / ::before to be visible */
+  padding-right: 25px;      /* tightened reserve to reduce visible gap on right */
+}
+
+/* Make hover stable — remove horizontal shift that caused overflow.
+   Keep subtle vertical lift, left accent and shadow. */
+.cashier-root .cashier-sidebar a:hover,
+.cashier-root .cashier-sidebar button:hover,
+.cashier-root .cashier-sidebar .menu-item:hover {
+  transform: translateY(-2px);    /* vertical lift only */
+  background: var(--cashier-muted);
+  color: var(--cashier-primary);
+  box-shadow: 0 8px 24px rgba(33,53,71,0.06);
+  /* DO NOT increase padding-left here — keep width stable */
+  padding-left: 14px;
+}
+
+/* keep the decorative accent inside the sidebar */
+.cashier-root .cashier-sidebar a:hover::before,
+.cashier-root .cashier-sidebar button:hover::before,
+.cashier-root .cashier-sidebar .menu-item:hover::before {
+  width: 3px; /* slimmer accent to reduce horizontal footprint */
+}
+
+/* If horizontal scrollbar persists in some layouts, also ensure the outer container hides overflow:
+   .cashier-root > .outer, .cashier-root > .main-area { overflow-x: hidden; } */
+
+
+
+/* Recent Transactions Table */
+.cashier-table {
+  width: 100%;
+  border-collapse: separate;   /* allow rounded corners */
+  border-spacing: 0;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  font-family: Inter, system-ui, Arial, sans-serif;
+}
+
+/* Table header */
+.cashier-table thead {
+  background: #f1f5f9;
+  color: #374151;
+  font-weight: 600;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.cashier-table thead th {
+  padding: 12px 16px;
+}
+
+/* Table body */
+.cashier-table tbody td {
+  padding: 12px 16px;
+  color: #1f2937;
+  font-size: 0.93rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Zebra effect for rows */
+.cashier-table tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+/* Hover effect */
+.cashier-table tbody tr:hover {
+  background: #eff6ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.15s ease-in-out;
+}
+
+/* Rounded corners for top/bottom cells */
+.cashier-table thead th:first-child {
+  border-top-left-radius: 12px;
+}
+.cashier-table thead th:last-child {
+  border-top-right-radius: 12px;
+}
+.cashier-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 12px;
+}
+.cashier-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 12px;
+}
+
+/* Scrollable on small screens */
+.cashier-table-container {
+  overflow-x: auto;
+}

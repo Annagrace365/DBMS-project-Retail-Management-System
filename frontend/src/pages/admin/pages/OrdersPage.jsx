@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
-import Table from "../components/ui/Table";
 import api from "../services/adminApi";
 
 export default function OrdersPage() {
@@ -23,32 +22,60 @@ export default function OrdersPage() {
     fetchOrders();
   }, []);
 
-  const columns = [
-    { key: "order_number", title: "Order #", render: (r) => r.order_number },
-    { key: "customer_name", title: "Customer", render: (r) => r.customer_name || "-" },
-    { key: "total", title: "Total", render: (r) => `₹ ${r.total}` },
-    { key: "created_at", title: "Date", render: (r) => new Date(r.created_at).toLocaleDateString() },
-  ];
+  // Create Order button handler
+  const handleCreateOrder = () => {
+    // Open modal or navigate to order creation page
+    alert("Create Order clicked!");
+  };
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Orders</h2>
-        <div>
-          <button className="px-3 py-2 bg-green-600 text-white rounded">Create Order</button>
+      {/* Header with right-aligned button */}
+      <div className="flex items-center mb-6 w-full">
+        <h2 className="text-2xl font-semibold">Orders</h2>
+        <div className="ml-auto">
+          <button onClick={handleCreateOrder} className="btn-create-order">
+            + Create Order
+          </button>
         </div>
       </div>
 
-      <Table
-        columns={columns}
-        data={loading ? [] : orders}
-        renderRowActions={(row) => (
-          <div className="flex gap-2">
-            <button className="px-2 py-1 border rounded">View</button>
-            <button className="px-2 py-1 border rounded">Invoice</button>
-          </div>
+      {/* Orders Table */}
+      <div className="card">
+        {loading ? (
+          <div className="loading">Loading orders...</div>
+        ) : orders.length > 0 ? (
+          <table className="card-table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Total</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((o) => (
+                <tr key={o.id}>
+                  <td>{o.order_number}</td>
+                  <td>{o.customer_name || "-"}</td>
+                  <td>₹ {o.total}</td>
+                  <td>{new Date(o.created_at).toLocaleDateString()}</td>
+                  <td>
+                    <div className="flex gap-2">
+                      <button className="btn-row-action">View</button>
+                      <button className="btn-row-action">Invoice</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-gray-500 text-sm mt-2">No orders found</div>
         )}
-      />
+      </div>
     </AdminLayout>
   );
 }

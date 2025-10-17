@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
-import Table from "../components/ui/Table";
-import api from "../services/adminApi"; // use default api
+import api from "../services/adminApi"; // default API
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState([]);
@@ -23,15 +22,7 @@ export default function CustomersPage() {
     fetchCustomers();
   }, []);
 
-  const columns = [
-    { key: "name", title: "Name", render: (r) => r.name },
-    { key: "phone", title: "Phone" },
-    { key: "email", title: "Email" },
-    { key: "orders_count", title: "Orders", render: (r) => r.orders_count || 0 },
-    { key: "last_order_date", title: "Last Order", render: (r) => r.last_order_date || "-" },
-  ];
-
-  // Example: addCustomer handler (optional)
+  // Add new customer
   const handleAddCustomer = async () => {
     const name = prompt("Enter customer name:");
     if (!name) return;
@@ -48,16 +39,50 @@ export default function CustomersPage() {
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Customers</h2>
-        
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold">Customers</h2>
+        <button
+          onClick={handleAddCustomer}
+          className="btn-add-customer"
+        >
+          + Add Customer 
+        </button>
       </div>
 
-      <Table
-        columns={columns}
-        data={loading ? [] : customers}
-        
-      />
+      <div className="card">
+        {loading ? (
+          <div className="loading">Loading customers...</div>
+        ) : customers.length > 0 ? (
+          <table className="card-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Orders</th>
+                <th>Last Order</th>
+              </tr>
+            </thead>
+            <tbody>
+              {customers.map((c) => (
+                <tr key={c.id}>
+                  <td>{c.name}</td>
+                  <td>{c.phone || "-"}</td>
+                  <td>{c.email || "-"}</td>
+                  <td>{c.orders_count || 0}</td>
+                  <td>
+                    {c.last_order_date
+                      ? new Date(c.last_order_date).toLocaleDateString()
+                      : "-"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-gray-500 text-sm mt-2">No customers found</div>
+        )}
+      </div>
     </AdminLayout>
   );
 }
