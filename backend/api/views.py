@@ -162,14 +162,47 @@ def delete_customer(request, pk):
 
 
 # ---------- LIST ORDERS ----------
+# LIST ORDERS
 @api_view(["GET"])
 @permission_classes([AllowAny])
 @authentication_classes([])
 def list_orders(request):
-    orders = Order.objects.select_related("customer_id").all().order_by("-order_date")
+    orders = Order.objects.select_related("customer_id", "cashier").all().order_by("-order_date")
     serializer = OrderListSerializer(orders, many=True)
     return Response(serializer.data)
 
+
+# GET ORDER DETAILS
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def get_order(request, pk):
+    try:
+        o = Order.objects.get(pk=pk)
+    except Order.DoesNotExist:
+        return Response({"success": False, "message": "Order not found"}, status=404)
+
+    items = []
+    for item in OrderItem.objects.filter(order_id=o):
+        total = float(item.price) * item.quantity if item.price else 0
+        items.append({
+            "name": item.name if item.name else (item.product_id.name if item.product_id else ""),
+            "price": float(item.price or 0),
+            "quantity": item.quantity,
+            "total": total,
+        })
+
+    data = {
+        "order_id": o.order_id,
+        "customer_name": o.customer_id.name,
+        "cashier_name": o.cashier.username if o.cashier else "-",
+        "subtotal": float(o.subtotal),
+        "tax": float(o.tax),
+        "amount": float(o.amount),
+        "status": o.status,
+        "items": items,
+    }
+    return Response(data)
 
 # ---------- LIST PRODUCTS ----------
 @api_view(["GET"])
@@ -278,6 +311,35 @@ def list_suppliers(request):
     ]
     return JsonResponse(data, safe=False)
 
+@api_view(["PATCH"])
+@permission_classes([AllowAny])
+def patch_supplier(request, pk):
+    try:
+        supplier = Supplier.objects.get(pk=pk)
+    except Supplier.DoesNotExist:
+        return Response({"success": False, "message": "Supplier not found"}, status=404)
+
+    name = request.data.get("name")
+    email = request.data.get("email")
+
+    if name:
+        supplier.name = name
+    if email:
+        supplier.contact = email
+    supplier.save()
+
+    return Response({"success": True, "message": "Supplier updated"})
+
+
+@api_view(["DELETE"])
+@permission_classes([AllowAny])
+def delete_supplier(request, pk):
+    try:
+        supplier = Supplier.objects.get(pk=pk)
+        supplier.delete()
+        return Response({"success": True, "message": "Supplier deleted"})
+    except Supplier.DoesNotExist:
+        return Response({"success": False, "message": "Supplier not found"}, status=404)
 
 
 # ---------- LIST PAYMENTS ----------

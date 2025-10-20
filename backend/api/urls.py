@@ -15,6 +15,10 @@ urlpatterns = [
     path("admin/products/create/", views.create_product, name="create_product"),
     path("admin/suppliers/create/", views.create_supplier, name="create-supplier"),
     path("admin/products/<int:pk>/", views.patch_product, name="patch-product"),
+    path("admin/orders/<int:pk>/", views.get_order, name="get-order"),
+    path("admin/suppliers/<int:pk>/update/", views.patch_supplier, name="update-supplier"),
+    path("admin/suppliers/<int:pk>/", views.delete_supplier, name="delete-supplier"),
+
 
     # Cashier endpoints
     path('cashier/products/', views.list_products, name='cashier-products'),  # <-- ADD THIS

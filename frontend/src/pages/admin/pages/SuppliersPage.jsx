@@ -7,6 +7,11 @@ export default function SuppliersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Modal state
+  const [showModal, setShowModal] = useState(false);
+  const [modalMode, setModalMode] = useState("add"); // "add" or "edit"
+  const [currentSupplier, setCurrentSupplier] = useState({ name: "", contact: "", supplier_id: null });
+
   useEffect(() => {
     let mounted = true;
 
@@ -14,9 +19,6 @@ export default function SuppliersPage() {
       setLoading(true);
       setError(null);
       try {
-        if (!api || typeof api.listSuppliers !== "function") {
-          throw new Error("api.listSuppliers is not available — check adminApi export/import");
-        }
         const data = await api.listSuppliers();
         if (!mounted) return;
         setSuppliers(Array.isArray(data) ? data : []);
@@ -32,8 +34,55 @@ export default function SuppliersPage() {
     return () => { mounted = false; };
   }, []);
 
-  const handleAddSupplier = () => {
-    alert("Add Supplier clicked!");
+  // ---------- Modal handlers ----------
+  const openAddModal = () => {
+    setModalMode("add");
+    setCurrentSupplier({ name: "", contact: "", supplier_id: null });
+    setShowModal(true);
+  };
+
+  const openEditModal = (supplier) => {
+    setModalMode("edit");
+    setCurrentSupplier({ ...supplier });
+    setShowModal(true);
+  };
+
+  const handleModalSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (modalMode === "add") {
+        const data = await api.createSupplier({ name: currentSupplier.name, email: currentSupplier.contact });
+        setSuppliers((prev) => [...prev, { supplier_id: data.supplier_id, name: data.name, contact: currentSupplier.contact, products: [] }]);
+        alert("Supplier added successfully");
+      } else if (modalMode === "edit") {
+        await api.patchSupplier(currentSupplier.supplier_id, { name: currentSupplier.name, email: currentSupplier.contact });
+        setSuppliers((prev) =>
+          prev.map((s) =>
+            s.supplier_id === currentSupplier.supplier_id
+              ? { ...s, name: currentSupplier.name, contact: currentSupplier.contact }
+              : s
+          )
+        );
+        alert("Supplier updated successfully");
+      }
+      setShowModal(false);
+    } catch (err) {
+      console.error(err);
+      alert("Operation failed");
+    }
+  };
+
+  // ---------- Delete ----------
+  const handleDeleteSupplier = async (supplierId) => {
+    if (!window.confirm("Are you sure you want to delete this supplier?")) return;
+    try {
+      await api.deleteSupplier(supplierId);
+      setSuppliers((prev) => prev.filter((s) => s.supplier_id !== supplierId));
+      alert("Supplier deleted successfully");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete supplier");
+    }
   };
 
   return (
@@ -50,7 +99,7 @@ export default function SuppliersPage() {
             borderRadius: 6,
             cursor: "pointer",
           }}
-          onClick={handleAddSupplier}
+          onClick={openAddModal}
         >
           + Add Supplier
         </button>
@@ -84,7 +133,7 @@ export default function SuppliersPage() {
             </thead>
             <tbody>
               {suppliers.map((s) => (
-                <tr key={s.supplier_id ?? s.id ?? s.name}>
+                <tr key={s.supplier_id}>
                   <td style={{ padding: 8, border: "1px solid #ddd" }}>{s.name}</td>
                   <td style={{ padding: 8, border: "1px solid #ddd" }}>{s.contact || "-"}</td>
                   <td style={{ padding: 8, border: "1px solid #ddd" }}>
@@ -99,6 +148,7 @@ export default function SuppliersPage() {
                         borderRadius: 4,
                         cursor: "pointer",
                       }}
+                      onClick={() => openEditModal(s)}
                     >
                       Edit
                     </button>
@@ -110,6 +160,7 @@ export default function SuppliersPage() {
                         borderRadius: 4,
                         cursor: "pointer",
                       }}
+                      onClick={() => handleDeleteSupplier(s.supplier_id)}
                     >
                       Delete
                     </button>
@@ -122,6 +173,65 @@ export default function SuppliersPage() {
           <div style={{ color: "#6b7280", marginTop: 8 }}>No suppliers found</div>
         )}
       </div>
+
+      {/* ---------- Modal ---------- */}
+      {showModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 999,
+          }}
+        >
+          <div style={{ backgroundColor: "#fff", padding: 24, borderRadius: 8, width: 400 }}>
+            <h3>{modalMode === "add" ? "Add Supplier" : "Edit Supplier"}</h3>
+            <form onSubmit={handleModalSubmit}>
+              <div style={{ marginBottom: 12 }}>
+                <label>Name:</label>
+                <input
+                  type="text"
+                  value={currentSupplier.name}
+                  onChange={(e) => setCurrentSupplier({ ...currentSupplier, name: e.target.value })}
+                  style={{ width: "100%", padding: 8, marginTop: 4 }}
+                  required
+                />
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <label>Contact (Email):</label>
+                <input
+                  type="email"
+                  value={currentSupplier.contact}
+                  onChange={(e) => setCurrentSupplier({ ...currentSupplier, contact: e.target.value })}
+                  style={{ width: "100%", padding: 8, marginTop: 4 }}
+                  required
+                />
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  style={{ padding: "6px 12px", borderRadius: 4, cursor: "pointer" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{ padding: "6px 12px", borderRadius: 4, backgroundColor: "#22c55e", color: "#fff", cursor: "pointer" }}
+                >
+                  {modalMode === "add" ? "Add" : "Update"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }

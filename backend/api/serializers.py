@@ -33,12 +33,14 @@ class CustomerSerializer(serializers.ModelSerializer):
 class OrderListSerializer(serializers.ModelSerializer):
     order_number = serializers.IntegerField(source="order_id")
     customer_name = serializers.CharField(source="customer_id.name")
+    cashier_name = serializers.CharField(source="cashier.username", default="-")
     total = serializers.DecimalField(source="amount", max_digits=10, decimal_places=2)
+    status = serializers.CharField()
     created_at = serializers.DateField(source="order_date")  # matches model
 
     class Meta:
         model = Order
-        fields = ["order_number", "customer_name", "total", "created_at"]
+        fields = ["order_number", "customer_name", "cashier_name", "total", "status", "created_at"]
 
 
 
