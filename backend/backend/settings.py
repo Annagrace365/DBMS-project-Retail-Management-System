@@ -19,11 +19,14 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT', cast=int),
+        'NAME': 'myproject_db',          # the database name you created earlier
+        'USER': 'root',                  # your MySQL username
+        'PASSWORD': 'root',  # replace with your MySQL password
+        'HOST': '127.0.0.1',             # or 'localhost'
+        'PORT': '3306',                  # default MySQL port
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
