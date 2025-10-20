@@ -95,6 +95,17 @@ api.addOrderSupplier = async function (orderId, supplierIds) {
   const { data } = await api.post(`/admin/orders/${orderId}/suppliers/`, { supplier_ids: supplierIds });
   return data;
 };
+// Patch supplier
+api.patchSupplier = async (id, payload) => {
+  const { data } = await api.patch(`/admin/suppliers/${id}/update/`, payload);
+  return data;
+};
+
+// Delete supplier
+api.deleteSupplier = async (id) => {
+  const { data } = await api.delete(`/admin/suppliers/${id}/`);
+  return data;
+};
 
 
 // ---------------- Payments ----------------
