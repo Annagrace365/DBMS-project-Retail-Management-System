@@ -1,7 +1,8 @@
 // src/pages/cashier/components/InPOS.jsx
 import React, { useState } from "react";
 import { useCashier } from "./CashierContext";
-import mockProducts from "../services/mockProducts";
+// removed mockProducts import and use backend fetch
+import { fetchProducts } from "../services/cashierApi";
 
 /**
  * InPOS: full POS interface (frontend-only, no backend)
@@ -25,19 +26,39 @@ export default function InPOS() {
   const [searchResults, setSearchResults] = useState([]);
   const [manualItem, setManualItem] = useState({ name: "", price: "" });
 
-  function handleSearch(q) {
+  // --------- CHANGED: search now queries the DB and maps results to cart shape ----------
+  async function handleSearch(q) {
     setQuery(q);
     if (!q) {
       setSearchResults([]);
       return;
     }
-    const res = mockProducts.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q.toLowerCase()) ||
-        String(p.barcode).includes(q)
-    );
-    setSearchResults(res.slice(0, 10));
+
+    try {
+      // fetchProducts will call your backend endpoint (e.g. /api/admin/products/)
+      const products = await fetchProducts(q); // fetchProducts may filter server-side or return all
+      // Map backend product shape to the shape expected by the cart functions
+      // backend product fields: product_id, sku, name, price, stock
+      const mapped = products.map((p) => ({
+        id: p.product_id,          // matches original mockProducts.id
+        barcode: p.sku || "",      // preserve barcode field used in original search logic
+        name: p.name,
+        price: parseFloat(p.price), // ensure number
+      }));
+      // Filter by query (in case backend returns all); keep original behavior (name or barcode)
+      const res = mapped.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q.toLowerCase()) ||
+          String(p.barcode).includes(q)
+      );
+      setSearchResults(res.slice(0, 10));
+    } catch (err) {
+      console.error("Failed to fetch products", err);
+      // fallback to empty results if fetch fails
+      setSearchResults([]);
+    }
   }
+  // -------------------------------------------------------------------------------
 
   async function handleCompleteSale() {
     const payment = { method: "cash" }; // simplified

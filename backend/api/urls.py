@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import LoginView, admin_kpis, AdminCustomerListCreate,delete_customer
+from .views import LoginView, admin_kpis, AdminCustomerListCreate, delete_customer
 from . import views
+
 urlpatterns = [
-     path("login/", LoginView.as_view(), name="api-login"),
+    path("login/", LoginView.as_view(), name="api-login"),
     path("admin/kpis/", views.admin_kpis, name="admin-kpis"),
     path("admin/customers/", AdminCustomerListCreate.as_view(), name="admin-customers"),
     path("admin/orders/", views.list_orders, name="admin-orders"),
@@ -15,5 +16,9 @@ urlpatterns = [
     path("admin/suppliers/create/", views.create_supplier, name="create-supplier"),
     path("admin/products/<int:pk>/", views.patch_product, name="patch-product"),
 
-
+    # Cashier endpoints
+    path('cashier/products/', views.list_products, name='cashier-products'),  # <-- ADD THIS
+    path('cashier/orders/', views.CreateOrderView.as_view(), name='create-order'),
+    path('cashier/orders/<int:order_id>/add-item/', views.AddItemToOrderView.as_view(), name='add-item-to-order'),
+    path('cashier/orders/<int:order_id>/complete-sale/', views.CompleteSaleView.as_view(), name='complete-sale'),
 ]
