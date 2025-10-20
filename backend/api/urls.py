@@ -2,7 +2,7 @@ from django.urls import path
 from .views import LoginView, admin_kpis, AdminCustomerListCreate,delete_customer
 from . import views
 urlpatterns = [
-    path("login/", LoginView.as_view(), name="login"),
+    path("api/login/", LoginView.as_view(), name="api-login"),
     path("admin/kpis/", views.admin_kpis, name="admin-kpis"),
     path("admin/customers/", AdminCustomerListCreate.as_view(), name="admin-customers"),
     path("admin/orders/", views.list_orders, name="admin-orders"),
