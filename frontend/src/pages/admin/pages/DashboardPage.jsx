@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
-import api from "../services/adminApi";
+import api from "../services/adminApi"; // use this
 
 export default function DashboardPage() {
   const [kpis, setKpis] = useState({
@@ -19,7 +19,7 @@ export default function DashboardPage() {
 
     const fetchKpis = async () => {
       try {
-        const data = await admin.getKpis();
+        const data = await api.getKpis(); // <-- FIXED HERE
         if (!mounted) return;
 
         setKpis({
@@ -38,9 +38,7 @@ export default function DashboardPage() {
     };
 
     fetchKpis();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
   return (
@@ -108,7 +106,7 @@ export default function DashboardPage() {
                 {kpis.recentOrders.map((o) => (
                   <tr key={o.id}>
                     <td>{o.customer_name}</td>
-                    <td>₹ {o.amount}</td>
+                    <td>₹ {o.amount.toFixed(2)}</td>
                     <td>{new Date(o.order_date).toLocaleDateString()}</td>
                   </tr>
                 ))}

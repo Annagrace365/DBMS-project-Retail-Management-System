@@ -1,4 +1,3 @@
-# backend/api/views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
@@ -7,7 +6,7 @@ from rest_framework.permissions import AllowAny
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import permission_classes, authentication_classes, api_view
 from datetime import date, timedelta
-from django.db.models import Sum, F, Count, Max
+from django.db.models import Sum, Count, Max
 from rest_framework import generics, status
 from django.http import JsonResponse
 from .models import Customer, Order, OrderItem, Product, Payment, Supplier, ProductSupplier
@@ -24,8 +23,7 @@ class LoginView(APIView):
         if user:
             token, _ = Token.objects.get_or_create(user=user)
             return Response({"success": True, "token": token.key})
-        else:
-            return Response({"success": False, "message": "Invalid credentials"}, status=401)
+        return Response({"success": False, "message": "Invalid credentials"}, status=401)
 
 
 # ---------- KPIs ----------
@@ -41,6 +39,7 @@ def admin_kpis(request):
     low_stock_count = Product.objects.filter(stock__lt=LOW_STOCK_THRESHOLD).count()
     thirty_days_ago = today - timedelta(days=30)
     active_customers = Customer.objects.filter(order__order_date__gte=thirty_days_ago).distinct().count()
+
     top_products_qs = (
         OrderItem.objects
         .values('product_id', 'product_id__name')
@@ -51,6 +50,7 @@ def admin_kpis(request):
         {"id": p['product_id'], "name": p['product_id__name'], "qty_sold": int(p['qty_sold'])}
         for p in top_products_qs
     ]
+
     recent_orders_qs = Order.objects.order_by('-order_date')[:8].values(
         'order_id', 'customer_id__name', 'amount', 'order_date'
     )
@@ -63,6 +63,7 @@ def admin_kpis(request):
         }
         for o in recent_orders_qs
     ]
+
     data = {
         "todaySales": today_sales,
         "totalOrdersToday": total_orders_today,
@@ -106,14 +107,13 @@ def update_customer(request, pk):
     try:
         customer = Customer.objects.get(pk=pk)
     except Customer.DoesNotExist:
-        return Response({"success": False, "message": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"success": False, "message": "Customer not found"}, status=404)
 
     serializer = CustomerSerializer(customer, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
-        return Response({"success": True, "message": "Customer updated", "customer": serializer.data}, status=status.HTTP_200_OK)
-    else:
-        return Response({"success": False, "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"success": True, "message": "Customer updated", "customer": serializer.data})
+    return Response({"success": False, "errors": serializer.errors}, status=400)
 
 
 # ---------- DELETE CUSTOMER ----------
@@ -123,9 +123,9 @@ def delete_customer(request, pk):
     try:
         customer = Customer.objects.get(pk=pk)
         customer.delete()
-        return Response({"success": True, "message": "Customer deleted"}, status=status.HTTP_200_OK)
+        return Response({"success": True, "message": "Customer deleted"})
     except Customer.DoesNotExist:
-        return Response({"success": False, "message": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"success": False, "message": "Customer not found"}, status=404)
 
 
 # ---------- LIST ORDERS ----------
@@ -157,20 +157,11 @@ def list_products(request):
         })
     return JsonResponse(data, safe=False)
 
+
 # ---------- CREATE PRODUCT ----------
 @api_view(["POST"])
-@permission_classes([AllowAny])  # change to IsAdminUser in production
+@permission_classes([AllowAny])
 def create_product(request):
-    """
-    Create a new product.
-    Expected JSON:
-    {
-        "name": "Product Name",
-        "price": 123.45,
-        "stock": 10,
-        "supplier_ids": [1,2]  # optional
-    }
-    """
     data = request.data
     name = data.get("name")
     price = data.get("price")
@@ -182,7 +173,6 @@ def create_product(request):
 
     product = Product.objects.create(name=name, price=price, stock=stock)
 
-    # Link suppliers if any
     for sid in supplier_ids:
         try:
             supplier = Supplier.objects.get(pk=sid)
@@ -194,21 +184,23 @@ def create_product(request):
 
 
 # ---------- LIST SUPPLIERS ----------
+# ---------- LIST SUPPLIERS ----------
 @api_view(["GET"])
 @permission_classes([AllowAny])
 @authentication_classes([])
 def list_suppliers(request):
-    suppliers = Supplier.objects.all()
-    data = []
-    for supplier in suppliers:
-        data.append({
-            "supplier_id": supplier.supplier_id,
-            "name": supplier.name,
-            "contact": supplier.contact,
-            "phone": getattr(supplier, "phone", ""),
-            "email": getattr(supplier, "email", ""),
-        })
+    suppliers = Supplier.objects.prefetch_related('productsupplier_set__product_id').all()
+    data = [
+        {
+            "supplier_id": s.supplier_id,
+            "name": s.name,
+            "contact": s.contact,
+            "products": [ps.product_id.name for ps in s.productsupplier_set.all()]
+        }
+        for s in suppliers
+    ]
     return JsonResponse(data, safe=False)
+
 
 
 # ---------- LIST PAYMENTS ----------
@@ -217,14 +209,15 @@ def list_suppliers(request):
 @authentication_classes([])
 def list_payments(request):
     payments = Payment.objects.select_related('order_id', 'order_id__customer_id').all()
-    data = []
-    for p in payments:
-        data.append({
+    data = [
+        {
             "payment_id": p.payment_id,
             "order_number": f"O-{p.order_id.order_id:04d}",
             "customer_name": p.order_id.customer_id.name,
             "amount": float(p.amount),
             "mode": p.payment_mode,
             "date": p.order_id.order_date.strftime("%Y-%m-%d"),
-        })
+        }
+        for p in payments
+    ]
     return JsonResponse(data, safe=False)

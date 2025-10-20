@@ -3,7 +3,7 @@ from .views import LoginView, admin_kpis, AdminCustomerListCreate,delete_custome
 from . import views
 urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
-    path("admin/kpis", views.admin_kpis, name="admin-kpis"),
+    path("admin/kpis/", views.admin_kpis, name="admin-kpis"),
     path("admin/customers/", AdminCustomerListCreate.as_view(), name="admin-customers"),
     path("admin/orders/", views.list_orders, name="admin-orders"),
     path("admin/products/", views.list_products, name="list-products"),
