@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
-import api from "../services/adminApi"; // default export named `api`
+import api from "../services/adminApi";
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState([]);
@@ -19,7 +19,6 @@ export default function SuppliersPage() {
         }
         const data = await api.listSuppliers();
         if (!mounted) return;
-        // Make sure we always set an array
         setSuppliers(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Failed to fetch suppliers:", err);
@@ -34,7 +33,6 @@ export default function SuppliersPage() {
   }, []);
 
   const handleAddSupplier = () => {
-    // Open modal or navigate to add supplier page
     alert("Add Supplier clicked!");
   };
 
@@ -65,8 +63,7 @@ export default function SuppliersPage() {
               <tr>
                 <th>Supplier Name</th>
                 <th>Contact</th>
-                <th>Phone</th>
-                <th>Email</th>
+                <th>Products</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -74,9 +71,12 @@ export default function SuppliersPage() {
               {suppliers.map((s) => (
                 <tr key={s.supplier_id ?? s.id ?? s.name}>
                   <td>{s.name}</td>
-                  <td>{s.contact || "-"}</td>
-                  <td>{s.phone || "-"}</td>
-                  <td>{s.email || "-"}</td>
+                  <td>{s.contact}</td>
+                  <td>
+                    {s.products && s.products.length > 0
+                      ? s.products.join(", ")
+                      : "-"}
+                  </td>
                   <td>
                     <div className="flex gap-2">
                       <button className="btn-row-action">Edit</button>
