@@ -1,206 +1,189 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
 import api from "../services/adminApi";
-import "../../../styles/Customers.css"; // adjust path
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [newCustomer, setNewCustomer] = useState({
-    name: "",
-    phone: "",
-    address: "",
-    orders_count: 0,
-    last_order_date: "",
-  });
+  const [error, setError] = useState(null);
 
-  // Fetch customers
-  const fetchCustomers = async () => {
-    setLoading(true);
-    try {
-      const data = await api.listCustomers();
-      setCustomers(data || []);
-    } catch (err) {
-      console.error("Failed to fetch customers:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({ name: "", phone: "", address: "", orders_count: 0, last_order_date: "" });
+  const [currentCustomerId, setCurrentCustomerId] = useState(null); // For edit mode
 
   useEffect(() => {
-    fetchCustomers();
+    let mounted = true;
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await api.listCustomers();
+        if (!mounted) return;
+        setCustomers(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error(err);
+        setError(err.response?.data || err.message || String(err));
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+    load();
+    return () => { mounted = false; };
   }, []);
 
-  // Modal handlers
-  const handleAddCustomer = () => {
-    setNewCustomer({ name: "", phone: "", address: "", orders_count: 0, last_order_date: "" });
-    setModalOpen(true);
-  };
-  const handleCloseModal = () => setModalOpen(false);
-  const handleChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewCustomer((prev) => ({ ...prev, [name]: value }));
+    setForm({ ...form, [name]: value });
   };
 
-  // Submit new or updated customer
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!newCustomer.name || !newCustomer.phone || !newCustomer.address) {
-      alert("Please fill all fields");
+  const submitCustomer = async () => {
+    if (!form.name || !form.phone || !form.address) {
+      alert("Please fill all required fields");
       return;
     }
-
     try {
-      if (newCustomer.id) {
-        // Update existing customer
-        await api.updateCustomer(newCustomer.id, newCustomer);
+      if (currentCustomerId) {
+        await api.updateCustomer(currentCustomerId, form);
       } else {
-        // Create new customer
-        await api.createCustomer(newCustomer);
+        await api.createCustomer(form);
       }
-      setModalOpen(false);
-      fetchCustomers();
+
+      const data = await api.listCustomers();
+      setCustomers(Array.isArray(data) ? data : []);
+
+      setShowModal(false);
+      setCurrentCustomerId(null);
+      setForm({ name: "", phone: "", address: "", orders_count: 0, last_order_date: "" });
     } catch (err) {
-      console.error("Failed to save customer:", err.response || err);
+      console.error(err);
       alert("Failed to save customer");
     }
   };
 
-  // Edit & Delete handlers
   const handleEdit = (c) => {
-    setNewCustomer({
-      id: c.id,
+    setForm({
       name: c.name,
       phone: c.phone,
       address: c.address,
       orders_count: c.orders_count || 0,
       last_order_date: c.last_order_date || "",
     });
-    setModalOpen(true);
+    setCurrentCustomerId(c.id);
+    setShowModal(true);
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this customer?")) return;
     try {
       await api.deleteCustomer(id);
-      setCustomers(customers.filter((c) => c.id !== id));
+      setCustomers(customers.filter(c => c.id !== id));
     } catch (err) {
-      console.error("Failed to delete customer:", err);
+      console.error(err);
       alert("Failed to delete customer");
     }
   };
 
   return (
     <AdminLayout>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">Customers</h2>
-        <button onClick={handleAddCustomer} className="btn-add">
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
+        <h2 style={{ fontSize: 24, fontWeight: 600 }}>Customers</h2>
+        <button
+          style={{ marginLeft: "auto", padding: "8px 16px", backgroundColor: "#22c55e", color: "#fff", borderRadius: 6, cursor: "pointer" }}
+          onClick={() => { setForm({ name: "", phone: "", address: "", orders_count: 0, last_order_date: "" }); setCurrentCustomerId(null); setShowModal(true); }}
+        >
           + Add Customer
         </button>
       </div>
 
-      {/* Customers Table */}
-      <div className="card">
+      <div style={{ backgroundColor: "#fff", padding: 16, borderRadius: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
         {loading ? (
-          <div className="loading">Loading customers...</div>
+          <div>Loading customers...</div>
+        ) : error ? (
+          <div style={{ color: "red" }}>Error loading customers: {String(error)}</div>
         ) : customers.length > 0 ? (
-          <table className="card-table">
-            <thead>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead style={{ backgroundColor: "#f3f4f6" }}>
               <tr>
-                <th>Name</th>
-                <th>Phone</th>
-                <th>Address</th>
-                <th>Orders</th>
-                <th>Last Order</th>
-                <th>Actions</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Name</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Phone</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Address</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Orders</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Last Order</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {customers.map((c) => (
+              {customers.map(c => (
                 <tr key={c.id}>
-                  <td>{c.name}</td>
-                  <td>{c.phone || "-"}</td>
-                  <td>{c.address || "-"}</td>
-                  <td>{c.orders_count || 0}</td>
-                  <td>
-                    {c.last_order_date
-                      ? new Date(c.last_order_date).toLocaleDateString()
-                      : "-"}
-                  </td>
-                  <td>
-                    <div className="flex gap-2">
-                      <button className="btn-row-action" onClick={() => handleEdit(c)}>
-                        Edit
-                      </button>
-                      <button className="btn-row-action" onClick={() => handleDelete(c.id)}>
-                        Delete
-                      </button>
-                    </div>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{c.name}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{c.phone || "-"}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{c.address || "-"}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{c.orders_count || 0}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{c.last_order_date ? new Date(c.last_order_date).toLocaleDateString() : "-"}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>
+                    <button style={{ marginRight: 8, padding: "4px 8px", backgroundColor: "#facc15", borderRadius: 4, cursor: "pointer" }} onClick={() => handleEdit(c)}>Edit</button>
+                    <button style={{ padding: "4px 8px", backgroundColor: "#ef4444", color: "#fff", borderRadius: 4, cursor: "pointer" }} onClick={() => handleDelete(c.id)}>Delete</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         ) : (
-          <div className="text-gray-500 mt-2">No customers found</div>
+          <div style={{ color: "#6b7280" }}>No customers found</div>
         )}
       </div>
 
       {/* Modal */}
-      {modalOpen && (
-        <div className="modal-backdrop">
-          <div className="modal">
-            <h3>{newCustomer.id ? "Edit Customer" : "Add New Customer"}</h3>
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                name="name"
-                placeholder="Name"
-                value={newCustomer.name}
-                onChange={handleChange}
-                required
-              />
-              <input
-                type="text"
-                name="phone"
-                placeholder="Phone"
-                value={newCustomer.phone}
-                onChange={handleChange}
-              />
-              <textarea
-                name="address"
-                placeholder="Address"
-                value={newCustomer.address}
-                onChange={handleChange}
-              />
-              <input
-                type="number"
-                name="orders_count"
-                placeholder="Orders"
-                value={newCustomer.orders_count}
-                onChange={handleChange}
-              />
-              <input
-                type="date"
-                name="last_order_date"
-                placeholder="Last Order"
-                value={newCustomer.last_order_date}
-                onChange={handleChange}
-              />
-              <div className="modal-buttons">
-                <button type="submit" className="btn-submit">
-                  {newCustomer.id ? "Update Customer" : "Add Customer"}
-                </button>
-                <button type="button" className="btn-cancel" onClick={handleCloseModal}>
-                  Cancel
-                </button>
-              </div>
-            </form>
+      {showModal && (
+        <div style={{
+          position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50
+        }}>
+          <div style={{ backgroundColor: "#fff", padding: 24, borderRadius: 8, width: 400 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 16 }}>{currentCustomerId ? "Edit Customer" : "Add Customer"}</h2>
+
+            <div style={{ display: "flex", flexDirection: "column", marginBottom: 12 }}>
+              <label style={{ marginBottom: 4 }}>Name:</label>
+              <input style={{ padding: 8, border: "1px solid #ccc", borderRadius: 6 }} name="name" value={form.name} onChange={handleInputChange} />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", marginBottom: 12 }}>
+              <label style={{ marginBottom: 4 }}>Phone:</label>
+              <input style={{ padding: 8, border: "1px solid #ccc", borderRadius: 6 }} name="phone" value={form.phone} onChange={handleInputChange} />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", marginBottom: 12 }}>
+              <label style={{ marginBottom: 4 }}>Address:</label>
+              <textarea style={{ padding: 8, border: "1px solid #ccc", borderRadius: 6 }} name="address" value={form.address} onChange={handleInputChange} />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", marginBottom: 12 }}>
+              <label style={{ marginBottom: 4 }}>Orders:</label>
+              <input type="number" style={{ padding: 8, border: "1px solid #ccc", borderRadius: 6 }} name="orders_count" value={form.orders_count} onChange={handleInputChange} />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", marginBottom: 12 }}>
+              <label style={{ marginBottom: 4 }}>Last Order:</label>
+              <input type="date" style={{ padding: 8, border: "1px solid #ccc", borderRadius: 6 }} name="last_order_date" value={form.last_order_date} onChange={handleInputChange} />
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+              <button
+                style={{ padding: "8px 16px", backgroundColor: "#22c55e", color: "#fff", borderRadius: 6, cursor: "pointer" }}
+                onClick={submitCustomer}
+              >
+                {currentCustomerId ? "Update" : "Submit"}
+              </button>
+              <button
+                style={{ padding: "8px 16px", backgroundColor: "#e5e7eb", borderRadius: 6, cursor: "pointer" }}
+                onClick={() => { setShowModal(false); setCurrentCustomerId(null); }}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
-    </AdminLayout>
+        </AdminLayout>
   );
 }

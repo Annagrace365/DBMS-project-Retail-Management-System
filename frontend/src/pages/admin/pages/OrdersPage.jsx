@@ -22,58 +22,91 @@ export default function OrdersPage() {
     fetchOrders();
   }, []);
 
-  // Create Order button handler
   const handleCreateOrder = () => {
-    // Open modal or navigate to order creation page
     alert("Create Order clicked!");
   };
 
   return (
     <AdminLayout>
-      {/* Header with right-aligned button */}
-      <div className="flex items-center mb-6 w-full">
-        <h2 className="text-2xl font-semibold">Orders</h2>
-        <div className="ml-auto">
-          <button onClick={handleCreateOrder} className="btn-create-order">
-            + Create Order
-          </button>
-        </div>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
+        <h2 style={{ fontSize: 24, fontWeight: 600 }}>Orders</h2>
+        <button
+          style={{
+            marginLeft: "auto",
+            padding: "8px 16px",
+            backgroundColor: "#22c55e",
+            color: "#fff",
+            borderRadius: 6,
+            cursor: "pointer",
+          }}
+          onClick={handleCreateOrder}
+        >
+          + Create Order
+        </button>
       </div>
 
       {/* Orders Table */}
-      <div className="card">
+      <div
+        style={{
+          backgroundColor: "#fff",
+          padding: 16,
+          borderRadius: 8,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}
+      >
         {loading ? (
-          <div className="loading">Loading orders...</div>
+          <div>Loading orders...</div>
         ) : orders.length > 0 ? (
-          <table className="card-table">
-            <thead>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead style={{ backgroundColor: "#f3f4f6" }}>
               <tr>
-                <th>Order #</th>
-                <th>Customer</th>
-                <th>Total</th>
-                <th>Date</th>
-                <th>Actions</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Order #</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Customer</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Total</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Date</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {orders.map((o) => (
                 <tr key={o.id}>
-                  <td>{o.order_number}</td>
-                  <td>{o.customer_name || "-"}</td>
-                  <td>₹ {o.total}</td>
-                  <td>{new Date(o.created_at).toLocaleDateString()}</td>
-                  <td>
-                    <div className="flex gap-2">
-                      <button className="btn-row-action">View</button>
-                      <button className="btn-row-action">Invoice</button>
-                    </div>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{o.order_number}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{o.customer_name || "-"}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>₹ {o.total}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>
+                    {new Date(o.created_at).toLocaleDateString()}
+                  </td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>
+                    <button
+                      style={{
+                        marginRight: 8,
+                        padding: "4px 8px",
+                        backgroundColor: "#facc15",
+                        borderRadius: 4,
+                        cursor: "pointer",
+                      }}
+                    >
+                      View
+                    </button>
+                    <button
+                      style={{
+                        padding: "4px 8px",
+                        backgroundColor: "#3b82f6",
+                        color: "#fff",
+                        borderRadius: 4,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Invoice
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         ) : (
-          <div className="text-gray-500 text-sm mt-2">No orders found</div>
+          <div style={{ color: "#6b7280", marginTop: 8 }}>No orders found</div>
         )}
       </div>
     </AdminLayout>
