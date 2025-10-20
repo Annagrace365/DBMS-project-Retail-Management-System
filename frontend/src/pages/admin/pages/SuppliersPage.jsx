@@ -39,56 +39,87 @@ export default function SuppliersPage() {
   return (
     <AdminLayout>
       {/* Header */}
-      <div className="flex items-center mb-6 w-full">
-        <h2 className="text-2xl font-semibold">Suppliers</h2>
-        <div className="ml-auto">
-          <button onClick={handleAddSupplier} className="btn-add-supplier">
-            + Add Supplier
-          </button>
-        </div>
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
+        <h2 style={{ fontSize: 24, fontWeight: 600 }}>Suppliers</h2>
+        <button
+          style={{
+            marginLeft: "auto",
+            padding: "8px 16px",
+            backgroundColor: "#22c55e",
+            color: "#fff",
+            borderRadius: 6,
+            cursor: "pointer",
+          }}
+          onClick={handleAddSupplier}
+        >
+          + Add Supplier
+        </button>
       </div>
 
       {/* Suppliers Table */}
-      <div className="card">
+      <div
+        style={{
+          backgroundColor: "#fff",
+          padding: 16,
+          borderRadius: 8,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}
+      >
         {loading ? (
-          <div className="loading">Loading suppliers...</div>
+          <div>Loading suppliers...</div>
         ) : error ? (
           <div style={{ color: "red", padding: 12 }}>
             <strong>Error loading suppliers</strong>
             <pre style={{ whiteSpace: "pre-wrap" }}>{String(error)}</pre>
           </div>
         ) : suppliers.length > 0 ? (
-          <table className="card-table">
-            <thead>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead style={{ backgroundColor: "#f3f4f6" }}>
               <tr>
-                <th>Supplier Name</th>
-                <th>Contact</th>
-                <th>Products</th>
-                <th>Actions</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Supplier Name</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Contact</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Products</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {suppliers.map((s) => (
                 <tr key={s.supplier_id ?? s.id ?? s.name}>
-                  <td>{s.name}</td>
-                  <td>{s.contact}</td>
-                  <td>
-                    {s.products && s.products.length > 0
-                      ? s.products.join(", ")
-                      : "-"}
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{s.name}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{s.contact || "-"}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>
+                    {s.products && s.products.length > 0 ? s.products.join(", ") : "-"}
                   </td>
-                  <td>
-                    <div className="flex gap-2">
-                      <button className="btn-row-action">Edit</button>
-                      <button className="btn-row-action">Delete</button>
-                    </div>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>
+                    <button
+                      style={{
+                        marginRight: 8,
+                        padding: "4px 8px",
+                        backgroundColor: "#facc15",
+                        borderRadius: 4,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      style={{
+                        padding: "4px 8px",
+                        backgroundColor: "#ef4444",
+                        color: "#fff",
+                        borderRadius: 4,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         ) : (
-          <div className="text-gray-500 text-sm mt-2">No suppliers found</div>
+          <div style={{ color: "#6b7280", marginTop: 8 }}>No suppliers found</div>
         )}
       </div>
     </AdminLayout>

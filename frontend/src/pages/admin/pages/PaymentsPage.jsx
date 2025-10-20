@@ -28,44 +28,53 @@ export default function PaymentsPage() {
   return (
     <AdminLayout>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">Payments</h2>
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
+        <h2 style={{ fontSize: 24, fontWeight: 600 }}>Payments</h2>
       </div>
 
       {/* Payments Table */}
-      <div className="card">
+      <div
+        style={{
+          backgroundColor: "#fff",
+          padding: 16,
+          borderRadius: 8,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}
+      >
         {loading ? (
-          <div className="loading">Loading payments...</div>
+          <div>Loading payments...</div>
         ) : error ? (
           <div style={{ color: "red", padding: 12 }}>
             <strong>Error loading payments</strong>
             <pre style={{ whiteSpace: "pre-wrap" }}>{String(error)}</pre>
           </div>
         ) : payments.length > 0 ? (
-          <table className="card-table">
-            <thead>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead style={{ backgroundColor: "#f3f4f6" }}>
               <tr>
-                <th>Order Number</th>
-                <th>Customer</th>
-                <th>Amount</th>
-                <th>Payment Mode</th>
-                <th>Date</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Order Number</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Customer</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Amount</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Payment Mode</th>
+                <th style={{ padding: 8, border: "1px solid #ddd" }}>Date</th>
               </tr>
             </thead>
             <tbody>
               {payments.map((p) => (
                 <tr key={p.payment_id}>
-                  <td>{p.order_number}</td>
-                  <td>{p.customer_name}</td>
-                  <td>₹ {p.amount.toFixed(2)}</td>
-                  <td>{p.mode}</td>
-                  <td>{new Date(p.date).toLocaleDateString()}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{p.order_number}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{p.customer_name}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>₹ {p.amount.toFixed(2)}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{p.mode}</td>
+                  <td style={{ padding: 8, border: "1px solid #ddd" }}>
+                    {new Date(p.date).toLocaleDateString()}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         ) : (
-          <div className="text-gray-500 mt-2">No payments found</div>
+          <div style={{ color: "#6b7280", marginTop: 8 }}>No payments found</div>
         )}
       </div>
     </AdminLayout>

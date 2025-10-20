@@ -214,8 +214,52 @@ def create_product(request):
 
     return Response({"success": True, "message": "Product created", "product_id": product.product_id}, status=201)
 
+@api_view(["PATCH"])
+@permission_classes([AllowAny])
+def patch_product(request, pk):
+    try:
+        product = Product.objects.get(pk=pk)
+    except Product.DoesNotExist:
+        return Response({"success": False, "message": "Product not found"}, status=404)
 
-# ---------- LIST SUPPLIERS ----------
+    data = request.data
+    name = data.get("name")
+    price = data.get("price")
+    stock = data.get("stock")
+    supplier_ids = data.get("supplier_ids", [])
+
+    if name is not None:
+        product.name = name
+    if price is not None:
+        product.price = price
+    if stock is not None:
+        product.stock = stock
+    product.save()
+
+    # Update suppliers: remove old, add new
+    ProductSupplier.objects.filter(product_id=product).delete()
+    for sid in supplier_ids:
+        try:
+            supplier = Supplier.objects.get(pk=sid)
+            ProductSupplier.objects.create(product_id=product, supplier_id=supplier)
+        except Supplier.DoesNotExist:
+            continue
+
+    return Response({"success": True, "message": "Product updated"})
+
+# ---------- CREATE SUPPLIERS ----------
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def create_supplier(request):
+    name = request.data.get("name")
+    email = request.data.get("email")
+
+    if not name or not email:
+        return Response({"success": False, "message": "Name and email are required"}, status=400)
+
+    supplier = Supplier.objects.create(name=name, contact=email)
+    return Response({"success": True, "supplier_id": supplier.supplier_id, "name": supplier.name}, status=201)
+
 # ---------- LIST SUPPLIERS ----------
 @api_view(["GET"])
 @permission_classes([AllowAny])

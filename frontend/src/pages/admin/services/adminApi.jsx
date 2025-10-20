@@ -78,13 +78,24 @@ api.createProduct = async function (payload) {
   const { data } = await api.post("/admin/products/create/", payload);
   return data;
 };
-
+api.patchProduct = async (id, payload) => {
+  const { data } = await api.patch(`/admin/products/${id}/`, payload);
+  return data;
+};
 
 // ---------------- Suppliers ----------------
 api.listSuppliers = async function (params) {
   const { data } = await api.get("/admin/suppliers/", { params });
   return data;
 };
+
+api.createSupplier = async (payload) => (await api.post("/admin/suppliers/create/", payload)).data; // <-- NEW
+// ---------------- Order-Supplier Assignment ----------------
+api.addOrderSupplier = async function (orderId, supplierIds) {
+  const { data } = await api.post(`/admin/orders/${orderId}/suppliers/`, { supplier_ids: supplierIds });
+  return data;
+};
+
 
 // ---------------- Payments ----------------
 api.listPayments = async function (params) {
