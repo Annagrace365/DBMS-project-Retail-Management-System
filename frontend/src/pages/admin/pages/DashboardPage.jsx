@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
-import { adminApi } from "../services/adminApi";
+import api from "../services/adminApi";
 
 export default function DashboardPage() {
   const [kpis, setKpis] = useState({
@@ -19,7 +19,7 @@ export default function DashboardPage() {
 
     const fetchKpis = async () => {
       try {
-        const data = await adminApi.getKpis();
+        const data = await admin.getKpis();
         if (!mounted) return;
 
         setKpis({

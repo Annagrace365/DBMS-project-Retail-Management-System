@@ -5,63 +5,42 @@ from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import permission_classes, authentication_classes
+from rest_framework.decorators import permission_classes, authentication_classes, api_view
 from datetime import date, timedelta
-from django.db.models import Sum, F
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework import generics, permissions, status
-from django.db.models import Count, Max
-from rest_framework.response import Response
-from .models import Customer, Order
-from .serializers import CustomerSerializer # adjust if needed
-from .models import Order
-from .serializers import OrderListSerializer
-from .models import Order, OrderItem, Product, Customer, Payment
+from django.db.models import Sum, F, Count, Max
+from rest_framework import generics, status
 from django.http import JsonResponse
-from .models import Product, ProductSupplier
-from .models import Supplier, Payment
+from .models import Customer, Order, OrderItem, Product, Payment, Supplier, ProductSupplier
+from .serializers import CustomerSerializer, OrderListSerializer
 
-
+# ---------- LOGIN ----------
 @permission_classes([AllowAny])
 class LoginView(APIView):
-    """
-    Login API: Authenticate a user and return a token.
-    """
     @csrf_exempt
     def post(self, request):
-        username = request.data.get("username")  # or 'email' if you prefer
+        username = request.data.get("username")
         password = request.data.get("password")
-
         user = authenticate(username=username, password=password)
         if user:
-            # Create or get token
             token, _ = Token.objects.get_or_create(user=user)
             return Response({"success": True, "token": token.key})
         else:
             return Response({"success": False, "message": "Invalid credentials"}, status=401)
 
+
+# ---------- KPIs ----------
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @authentication_classes([])
 def admin_kpis(request):
     today = date.today()
-    
-    # 1) Today's sales
     today_sales_agg = Order.objects.filter(order_date=today).aggregate(total=Sum('amount'))
     today_sales = float(today_sales_agg['total'] or 0)
-
-    # 2) Total orders today
     total_orders_today = Order.objects.filter(order_date=today).count()
-
-    # 3) Low stock count
     LOW_STOCK_THRESHOLD = 5
     low_stock_count = Product.objects.filter(stock__lt=LOW_STOCK_THRESHOLD).count()
-
-    # 4) Active customers (orders in last 30 days)
     thirty_days_ago = today - timedelta(days=30)
     active_customers = Customer.objects.filter(order__order_date__gte=thirty_days_ago).distinct().count()
-
-    # 5) Top products by quantity sold
     top_products_qs = (
         OrderItem.objects
         .values('product_id', 'product_id__name')
@@ -72,8 +51,6 @@ def admin_kpis(request):
         {"id": p['product_id'], "name": p['product_id__name'], "qty_sold": int(p['qty_sold'])}
         for p in top_products_qs
     ]
-
-    # 6) Recent orders
     recent_orders_qs = Order.objects.order_by('-order_date')[:8].values(
         'order_id', 'customer_id__name', 'amount', 'order_date'
     )
@@ -86,7 +63,6 @@ def admin_kpis(request):
         }
         for o in recent_orders_qs
     ]
-
     data = {
         "todaySales": today_sales,
         "totalOrdersToday": total_orders_today,
@@ -95,21 +71,16 @@ def admin_kpis(request):
         "topProducts": top_products,
         "recentOrders": recent_orders
     }
-
     return Response(data)
 
 
+# ---------- CUSTOMER LIST / CREATE ----------
 @authentication_classes([])
 class AdminCustomerListCreate(generics.ListCreateAPIView):
-    """
-    GET  /api/admin/customers/  -> list customers with orders_count & last_order_date
-    POST /api/admin/customers/  -> create a new customer (name, address, phone)
-    """
-    permission_classes = [permissions.AllowAny]  # change to IsAuthenticated or IsAdminUser in prod
+    permission_classes = [AllowAny]
     serializer_class = CustomerSerializer
 
     def get_queryset(self):
-        # annotate orders_count and last_order_date from related Order model
         qs = Customer.objects.annotate(
             orders_count=Count("order"),
             last_order_date=Max("order__order_date")
@@ -117,12 +88,9 @@ class AdminCustomerListCreate(generics.ListCreateAPIView):
         return qs
 
     def create(self, request, *args, **kwargs):
-        # standard create behavior but return serialized annotated representation
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-
-        # re-fetch the created instance with annotations for consistent response
         instance = Customer.objects.filter(pk=serializer.instance.pk).annotate(
             orders_count=Count("order"),
             last_order_date=Max("order__order_date")
@@ -130,8 +98,39 @@ class AdminCustomerListCreate(generics.ListCreateAPIView):
         out = CustomerSerializer(instance).data
         return Response(out, status=status.HTTP_201_CREATED)
 
+
+# ---------- UPDATE CUSTOMER ----------
+@api_view(["PATCH"])
+@permission_classes([AllowAny])
+def update_customer(request, pk):
+    try:
+        customer = Customer.objects.get(pk=pk)
+    except Customer.DoesNotExist:
+        return Response({"success": False, "message": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    serializer = CustomerSerializer(customer, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"success": True, "message": "Customer updated", "customer": serializer.data}, status=status.HTTP_200_OK)
+    else:
+        return Response({"success": False, "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ---------- DELETE CUSTOMER ----------
+@api_view(["DELETE"])
+@permission_classes([AllowAny])
+def delete_customer(request, pk):
+    try:
+        customer = Customer.objects.get(pk=pk)
+        customer.delete()
+        return Response({"success": True, "message": "Customer deleted"}, status=status.HTTP_200_OK)
+    except Customer.DoesNotExist:
+        return Response({"success": False, "message": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+# ---------- LIST ORDERS ----------
 @api_view(["GET"])
-@permission_classes([AllowAny])  # allow access without auth
+@permission_classes([AllowAny])
 @authentication_classes([])
 def list_orders(request):
     orders = Order.objects.select_related("customer_id").all().order_by("-order_date")
@@ -139,64 +138,93 @@ def list_orders(request):
     return Response(serializer.data)
 
 
+# ---------- LIST PRODUCTS ----------
 @api_view(["GET"])
-@permission_classes([AllowAny])  # allow access without auth
+@permission_classes([AllowAny])
 @authentication_classes([])
 def list_products(request):
-    """
-    Return all products with stock, price, and supplier names.
-    """
-    # Prefetch suppliers to avoid N+1 queries
     products = Product.objects.prefetch_related('productsupplier_set__supplier_id').all()
     data = []
-
     for product in products:
         suppliers = [ps.supplier_id.name for ps in product.productsupplier_set.all()]
         data.append({
             "product_id": product.product_id,
-            "sku": f"P-{product.product_id:04d}",   # optional SKU
+            "sku": f"P-{product.product_id:04d}",
             "name": product.name,
             "price": float(product.price),
             "stock": product.stock,
             "supplier_name": ", ".join(suppliers) if suppliers else "-",
         })
-
     return JsonResponse(data, safe=False)
 
+# ---------- CREATE PRODUCT ----------
+@api_view(["POST"])
+@permission_classes([AllowAny])  # change to IsAdminUser in production
+def create_product(request):
+    """
+    Create a new product.
+    Expected JSON:
+    {
+        "name": "Product Name",
+        "price": 123.45,
+        "stock": 10,
+        "supplier_ids": [1,2]  # optional
+    }
+    """
+    data = request.data
+    name = data.get("name")
+    price = data.get("price")
+    stock = data.get("stock", 0)
+    supplier_ids = data.get("supplier_ids", [])
 
+    if not name or price is None:
+        return Response({"success": False, "message": "Name and price are required"}, status=400)
+
+    product = Product.objects.create(name=name, price=price, stock=stock)
+
+    # Link suppliers if any
+    for sid in supplier_ids:
+        try:
+            supplier = Supplier.objects.get(pk=sid)
+            ProductSupplier.objects.create(product_id=product, supplier_id=supplier)
+        except Supplier.DoesNotExist:
+            continue
+
+    return Response({"success": True, "message": "Product created", "product_id": product.product_id}, status=201)
+
+
+# ---------- LIST SUPPLIERS ----------
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@authentication_classes([])
 def list_suppliers(request):
-    """
-    Return all suppliers with contact info.
-    """
     suppliers = Supplier.objects.all()
     data = []
-
     for supplier in suppliers:
         data.append({
             "supplier_id": supplier.supplier_id,
             "name": supplier.name,
             "contact": supplier.contact,
-            "phone": getattr(supplier, "phone", ""),  # optional field if you add later
-            "email": getattr(supplier, "email", ""),  # optional field if you add later
+            "phone": getattr(supplier, "phone", ""),
+            "email": getattr(supplier, "email", ""),
         })
-
     return JsonResponse(data, safe=False)
 
+
+# ---------- LIST PAYMENTS ----------
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@authentication_classes([])
 def list_payments(request):
-    """
-    Return all payments with related order and customer info.
-    """
     payments = Payment.objects.select_related('order_id', 'order_id__customer_id').all()
     data = []
-
     for p in payments:
         data.append({
             "payment_id": p.payment_id,
-            "order_number": f"O-{p.order_id.order_id:04d}",  # optional order formatting
+            "order_number": f"O-{p.order_id.order_id:04d}",
             "customer_name": p.order_id.customer_id.name,
             "amount": float(p.amount),
             "mode": p.payment_mode,
             "date": p.order_id.order_date.strftime("%Y-%m-%d"),
         })
-
     return JsonResponse(data, safe=False)

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
 import Table from "../components/ui/Table";
-import { adminApi } from "../services/adminApi";
+import api from "../services/adminApi";
 
 export default function AuditPage() {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-    adminApi.listAuditLogs?.().then((d) => setLogs(d || []));
+    api.listAuditLogs?.().then((d) => setLogs(d || []));
   }, []);
 
   const cols = [

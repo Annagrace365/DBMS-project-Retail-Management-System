@@ -6,6 +6,7 @@ class Users(models.Model):
     email = models.EmailField(unique=True, null=True)
 
     password = models.CharField(max_length=128)
+    role = models.CharField(max_length=50)  # admin, customer, manager
 
     def __str__(self):
         return self.username

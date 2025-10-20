@@ -22,6 +22,12 @@ function App() {
             </RequireAuth>
           }
         />
+        {/* <Route path="/admin/customers" 
+        element={
+        <CustomersPage />
+        } 
+        /> */}
+
 
         <Route
           path="/cashier/*"
