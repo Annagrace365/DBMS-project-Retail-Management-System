@@ -17,6 +17,7 @@ from django.contrib.auth.hashers import check_password
 from .models import Users  # Your custom Users model
 import secrets
 from django.db.models import Q
+from .serializers import OrderSerializer
 
 # ---------- LOGIN ----------
 class LoginView(APIView):
@@ -297,3 +298,44 @@ def list_payments(request):
         for p in payments
     ]
     return JsonResponse(data, safe=False)
+
+
+class CreateOrderView(APIView):
+    def post(self, request):
+        serializer = OrderSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+class AddItemToOrderView(APIView):
+    def post(self, request, order_id):
+        order = Order.objects.get(order_id=order_id)
+        serializer = OrderItemSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(order_id=order)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class CompleteSaleView(APIView):
+    def post(self, request, order_id):
+        try:
+            order = Order.objects.get(order_id=order_id)
+        except Order.DoesNotExist:
+            return Response({"success": False, "message": "Order not found"}, status=404)
+
+        payment_data = request.data.get('payment')
+        payment_serializer = PaymentSerializer(data=payment_data)
+        if payment_serializer.is_valid():
+            payment = payment_serializer.save(order_id=order)
+            order.status = 'completed'
+            order.save()
+            return Response({
+                "success": True,
+                "message": "Sale completed successfully",
+                "payment": payment_serializer.data
+            })
+        return Response(payment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
