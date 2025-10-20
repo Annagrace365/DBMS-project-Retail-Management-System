@@ -11,21 +11,77 @@ from rest_framework import generics, status
 from django.http import JsonResponse
 from .models import Customer, Order, OrderItem, Product, Payment, Supplier, ProductSupplier
 from .serializers import CustomerSerializer, OrderListSerializer
-
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.hashers import check_password
+from .models import Users  # Your custom Users model
+import secrets
 # ---------- LOGIN ----------
+@method_decorator(csrf_exempt, name="dispatch")
 @permission_classes([AllowAny])
 class LoginView(APIView):
-    @csrf_exempt
+    """
+    POST JSON payload:
+    {
+      "identifier": "username_or_email",
+      "password": "plain_password",
+      "role": "admin" | "cashier" | "manager"
+    }
+
+    Response on success:
+    { "success": True, "token": "<hex>", "role": "admin" }
+
+    Response on failure: 401 with message
+    """
     def post(self, request):
-        username = request.data.get("username")
+        identifier = request.data.get("identifier")
         password = request.data.get("password")
-        user = authenticate(username=username, password=password)
-        if user:
-            token, _ = Token.objects.get_or_create(user=user)
-            return Response({"success": True, "token": token.key})
-        return Response({"success": False, "message": "Invalid credentials"}, status=401)
+        role = request.data.get("role")
 
+        if not identifier or not password or not role:
+            return Response({"success": False, "message": "identifier, password and role are required"}, status=400)
 
+        # Find user by username or email
+        user = None
+        try:
+            user = Users.objects.get(username=identifier)
+        except Users.DoesNotExist:
+            try:
+                user = Users.objects.get(email=identifier)
+            except Users.DoesNotExist:
+                return Response({"success": False, "message": "Invalid username/email or password"}, status=401)
+
+        # Check role (adjust field name if your column differs)
+        stored_role = getattr(user, "role", None) or getattr(user, "user_type", None)
+        if stored_role and str(stored_role).lower() != str(role).lower():
+            return Response({"success": False, "message": "Role mismatch"}, status=401)
+
+        # Password verification: try Django check_password first (for hashed),
+        # fallback to plain-text compare if needed.
+        stored_password = getattr(user, "password", "")
+        password_ok = False
+        try:
+            if stored_password and check_password(password, stored_password):
+                password_ok = True
+        except Exception:
+            password_ok = False
+
+        if not password_ok:
+            # fallback plain-text (only if your DB stores plain text)
+            if stored_password == password:
+                password_ok = True
+
+        if not password_ok:
+            return Response({"success": False, "message": "Invalid username/email or password"}, status=401)
+
+        # Generate a simple token (not persisted). Frontend stores in localStorage.
+        token = secrets.token_hex(24)
+
+        return Response({
+            "success": True,
+            "token": token,
+            "role": str(role).lower()
+        })
 # ---------- KPIs ----------
 @api_view(['GET'])
 @permission_classes([AllowAny])
