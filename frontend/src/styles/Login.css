@@ -4,42 +4,100 @@
   margin: 80px auto;
   padding: 30px;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 10px;
   background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  font-family: Arial, sans-serif;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  font-family: "Poppins", Arial, sans-serif;
+  transition: all 0.3s ease;
 }
 
 .login-container h1 {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   color: #2c3e50;
+  font-weight: 600;
 }
 
-.login-container input {
+/* Common styles for input and select */
+.login-container input,
+.login-container select {
   width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
+  padding: 12px;
+  margin-bottom: 18px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  font-size: 15px;
+  transition: all 0.2s ease;
 }
 
+/* Focus/hover effects for inputs and dropdown */
+.login-container input:focus,
+.login-container select:focus {
+  border-color: #2c3e50;
+  outline: none;
+  background-color: #fff;
+  box-shadow: 0 0 5px rgba(44, 62, 80, 0.3);
+}
+
+/* Stylish dropdown */
+.login-container select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #2c3e50 50%),
+                    linear-gradient(135deg, #2c3e50 50%, transparent 50%);
+  background-position: calc(100% - 15px) calc(50% - 3px),
+                       calc(100% - 10px) calc(50% - 3px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+/* Dropdown hover */
+.login-container select:hover {
+  border-color: #34495e;
+  background-color: #fff;
+}
+
+/* Submit button */
 .login-container button {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   background-color: #2c3e50;
   color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .login-container button:hover {
   background-color: #34495e;
+  transform: scale(1.02);
 }
 
+/* Disabled button */
+.login-container button:disabled {
+  background-color: #888;
+  cursor: not-allowed;
+}
+
+/* Error message */
 .error-message {
-  color: red;
-  margin-bottom: 10px;
+  color: #e74c3c;
+  margin-bottom: 12px;
   text-align: center;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Smooth hover animation */
+.login-container input:hover,
+.login-container select:hover {
+  border-color: #34495e;
 }
