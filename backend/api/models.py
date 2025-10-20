@@ -1,15 +1,14 @@
 # backend/api/models.py
 from django.db import models
-
 class Users(models.Model):
-    username = models.CharField(max_length=100, unique=True)
-    email = models.EmailField(unique=True, null=True)
-
-    password = models.CharField(max_length=128)
-    role = models.CharField(max_length=50)  # admin, customer, manager
+    username = models.CharField(max_length=100, unique=True, null=False, blank=False)
+    email = models.EmailField(unique=True, null=False, blank=False)
+    password = models.CharField(max_length=128, null=False, blank=False)
+    role = models.CharField(max_length=50, null=False, blank=False)  # admin, customer, manager
 
     def __str__(self):
         return self.username
+
 # Customer
 class Customer(models.Model):
     customer_id = models.AutoField(primary_key=True)
