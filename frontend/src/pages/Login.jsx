@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import React, { useState, useEffect } from "react";
 import "../styles/Login.css";
 import axios from "axios";
@@ -7,19 +6,19 @@ import { useNavigate } from "react-router-dom";
 const Login = () => {
   const [identifier, setIdentifier] = useState(""); // username or email
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("admin"); // default role
+  const [role, setRole] = useState("admin"); // default
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   useEffect(() => {
+    // If already logged in, redirect automatically
     const token = localStorage.getItem("token");
     const savedRole = localStorage.getItem("role");
     if (token && savedRole) {
-      if (savedRole === "admin") navigate("/admin");
-      else if (savedRole === "cashier") navigate("/cashier");
-      else if (savedRole === "manager") navigate("/manager");
+      const route = savedRole.toLowerCase();
+      navigate(`/${route}`, { replace: true });
     }
   }, [navigate]);
 
@@ -36,20 +35,18 @@ const Login = () => {
       });
 
       if (res.data.success) {
-        localStorage.setItem("token", res.data.token);
+        // Save token + role
         localStorage.setItem("role", res.data.role);
+        localStorage.setItem("token", "dummy-token"); // can replace with real token
 
-        const r = (res.data.role || role || "").toLowerCase();
-        if (r === "admin") navigate("/admin");
-        else if (r === "cashier") navigate("/cashier");
-        else if (r === "manager") navigate("/manager");
-        else navigate("/");
+        const route = res.data.role.toLowerCase();
+        navigate(`/${route}`, { replace: true });
       } else {
         setError(res.data.message || "Invalid credentials or role");
       }
     } catch (err) {
       if (err.response && err.response.status === 401) {
-        setError(err.response.data.message || "Invalid username/email, password or role");
+        setError(err.response.data.message || "Invalid credentials or role");
       } else if (err.response) {
         setError(`Login failed: ${err.response.data.message || err.response.statusText}`);
       } else {
@@ -65,6 +62,7 @@ const Login = () => {
     <div className="login-container">
       <h1>Login</h1>
       {error && <div className="error-message">{error}</div>}
+
       <form onSubmit={handleSubmit}>
         <input
           type="text"
@@ -73,7 +71,6 @@ const Login = () => {
           onChange={(e) => setIdentifier(e.target.value)}
           required
         />
-
         <input
           type="password"
           placeholder="Password"
@@ -81,13 +78,11 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-
         <select value={role} onChange={(e) => setRole(e.target.value)} required>
           <option value="admin">Admin</option>
           <option value="cashier">Cashier</option>
           <option value="manager">Manager</option>
         </select>
-
         <button type="submit" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </button>
