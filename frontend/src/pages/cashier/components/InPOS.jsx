@@ -12,9 +12,18 @@ import mockProducts from "../services/mockProducts";
  * - Complete sale (mock)
  */
 export default function InPOS() {
-  const { currentCart, addItemToCart, updateQty, removeItemFromCart, holdInvoice, completeSale } = useCashier();
+  const {
+    currentCart,
+    addItemToCart,
+    updateQty,
+    removeItemFromCart,
+    holdInvoice,
+    completeSale,
+  } = useCashier();
+
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [manualItem, setManualItem] = useState({ name: "", price: "" });
 
   function handleSearch(q) {
     setQuery(q);
@@ -22,7 +31,11 @@ export default function InPOS() {
       setSearchResults([]);
       return;
     }
-    const res = mockProducts.filter((p) => p.name.toLowerCase().includes(q.toLowerCase()) || String(p.barcode).includes(q));
+    const res = mockProducts.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q.toLowerCase()) ||
+        String(p.barcode).includes(q)
+    );
     setSearchResults(res.slice(0, 10));
   }
 
@@ -37,23 +50,48 @@ export default function InPOS() {
       <section style={{ flex: 1 }}>
         <h2>Point of Sale</h2>
 
+        {/* Search Bar */}
         <div style={{ marginBottom: 12 }}>
           <input
             placeholder="Search product name or barcode..."
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
-            style={{ width: "100%", padding: "10px 12px", borderRadius: 6, border: "1px solid #d1d5db" }}
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              borderRadius: 6,
+              border: "1px solid #d1d5db",
+            }}
           />
           {searchResults.length > 0 && (
-            <div style={{ marginTop: 8, background: "#fff", borderRadius: 8, padding: 8 }}>
+            <div
+              style={{
+                marginTop: 8,
+                background: "#fff",
+                borderRadius: 8,
+                padding: 8,
+              }}
+            >
               {searchResults.map((p) => (
-                <div key={p.id} style={{ display: "flex", justifyContent: "space-between", padding: 8, borderBottom: "1px solid #eee" }}>
+                <div
+                  key={p.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: 8,
+                    borderBottom: "1px solid #eee",
+                  }}
+                >
                   <div>
                     <div style={{ fontWeight: 600 }}>{p.name}</div>
-                    <div style={{ fontSize: 12, color: "#6b7280" }}>₹ {p.price.toFixed(2)}</div>
+                    <div style={{ fontSize: 12, color: "#6b7280" }}>
+                      ₹ {p.price.toFixed(2)}
+                    </div>
                   </div>
                   <div>
-                    <button onClick={() => addItemToCart(p)} style={styles.addBtn}>Add</button>
+                    <button onClick={() => addItemToCart(p)} style={styles.addBtn}>
+                      Add
+                    </button>
                   </div>
                 </div>
               ))}
@@ -61,6 +99,68 @@ export default function InPOS() {
           )}
         </div>
 
+        {/* Manual Item Entry */}
+        <div
+          style={{
+            marginTop: 20,
+            padding: 10,
+            border: "1px solid #e5e7eb",
+            borderRadius: 8,
+            background: "#f9fafb",
+          }}
+        >
+          <h4>Manually Add Item</h4>
+          <div style={{ display: "flex", gap: 10, marginBottom: 8 }}>
+            <input
+              type="text"
+              placeholder="Item name"
+              value={manualItem.name}
+              onChange={(e) =>
+                setManualItem({ ...manualItem, name: e.target.value })
+              }
+              style={{
+                flex: 1,
+                padding: "8px",
+                border: "1px solid #d1d5db",
+                borderRadius: 6,
+              }}
+            />
+            <input
+              type="number"
+              placeholder="Price"
+              value={manualItem.price}
+              onChange={(e) =>
+                setManualItem({ ...manualItem, price: e.target.value })
+              }
+              style={{
+                width: 120,
+                padding: "8px",
+                border: "1px solid #d1d5db",
+                borderRadius: 6,
+              }}
+            />
+            <button
+              onClick={() => {
+                if (!manualItem.name || !manualItem.price) {
+                  alert("Enter valid name and price");
+                  return;
+                }
+                const item = {
+                  id: "manual_" + Date.now(),
+                  name: manualItem.name,
+                  price: parseFloat(manualItem.price),
+                };
+                addItemToCart(item);
+                setManualItem({ name: "", price: "" });
+              }}
+              style={styles.addBtn}
+            >
+              Add
+            </button>
+          </div>
+        </div>
+
+        {/* Cart Display */}
         <div style={{ marginTop: 14 }}>
           <h3>Cart</h3>
           {currentCart.items.length === 0 ? (
@@ -85,14 +185,24 @@ export default function InPOS() {
                         value={it.qty}
                         type="number"
                         min={1}
-                        onChange={(e) => updateQty(it.id, parseInt(e.target.value || "0", 10))}
+                        onChange={(e) =>
+                          updateQty(
+                            it.id,
+                            parseInt(e.target.value || "0", 10)
+                          )
+                        }
                         style={{ width: 60 }}
                       />
                     </td>
                     <td>₹ {it.price.toFixed(2)}</td>
                     <td>₹ {(it.price * it.qty).toFixed(2)}</td>
                     <td>
-                      <button onClick={() => removeItemFromCart(it.id)} style={styles.removeBtn}>Remove</button>
+                      <button
+                        onClick={() => removeItemFromCart(it.id)}
+                        style={styles.removeBtn}
+                      >
+                        Remove
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -102,16 +212,29 @@ export default function InPOS() {
         </div>
       </section>
 
+      {/* Summary Sidebar */}
       <aside style={{ width: 320 }}>
         <div style={{ padding: 16, background: "#fff", borderRadius: 8 }}>
           <h3>Summary</h3>
           <div>Subtotal: ₹ {currentCart.totals.subtotal.toFixed(2)}</div>
           <div>Tax: ₹ {currentCart.totals.tax.toFixed(2)}</div>
-          <div style={{ fontWeight: 700, marginTop: 8 }}>Total: ₹ {currentCart.totals.total.toFixed(2)}</div>
+          <div style={{ fontWeight: 700, marginTop: 8 }}>
+            Total: ₹ {currentCart.totals.total.toFixed(2)}
+          </div>
 
           <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-            <button onClick={() => { const h = holdInvoice(); alert("Held: " + h.id); }} style={styles.holdBtn}>Hold</button>
-            <button onClick={handleCompleteSale} style={styles.payBtn}>Pay</button>
+            <button
+              onClick={() => {
+                const h = holdInvoice();
+                alert("Held: " + h.id);
+              }}
+              style={styles.holdBtn}
+            >
+              Hold
+            </button>
+            <button onClick={handleCompleteSale} style={styles.payBtn}>
+              Pay
+            </button>
           </div>
         </div>
       </aside>
