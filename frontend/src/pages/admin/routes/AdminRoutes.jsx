@@ -9,7 +9,7 @@ import PaymentsPage from "../pages/PaymentsPage.jsx";
 import ReportsPage from "../pages/ReportsPage.jsx";
 import SettingsPage from "../pages/SettingsPage.jsx";
 import AuditPage from "../pages/AuditPage.jsx";
-
+import UsersPage from "../pages/UsersPage.jsx";
 
 export default function AdminRoutes() {
   return (
@@ -23,6 +23,7 @@ export default function AdminRoutes() {
       <Route path="reports" element={<ReportsPage />} />
       <Route path="settings" element={<SettingsPage />} />
       <Route path="audit" element={<AuditPage />} />
+      <Route path="users" element={<UsersPage />} />
     </Routes>
   );
 }

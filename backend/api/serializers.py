@@ -27,6 +27,16 @@ class CustomerSerializer(serializers.ModelSerializer):
         rep["id"] = rep.pop("customer_id")
         return rep
 
+from rest_framework import serializers
+from .models import Users
+
+class UserSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source="pk", read_only=True)
+    password = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+    class Meta:
+        model = Users
+        fields = ("id", "username", "email", "role", "password")
 
 
 

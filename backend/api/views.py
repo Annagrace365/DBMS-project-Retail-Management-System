@@ -401,3 +401,82 @@ class CompleteSaleView(APIView):
                 "payment": payment_serializer.data
             })
         return Response(payment_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Users
+from .serializers import UserSerializer
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def list_users(request):
+    users = Users.objects.all().order_by("pk")
+    serializer = UserSerializer(users, many=True)
+    # Serializer outputs id, username, email, role
+    return Response(serializer.data)
+@api_view(["GET", "PATCH", "DELETE"])
+@permission_classes([AllowAny])
+@authentication_classes([])  # adapt to your auth scheme in production
+def user_detail(request, pk):
+    try:
+        user = Users.objects.get(pk=pk)
+    except Users.DoesNotExist:
+        return Response({"success": False, "message": "User not found"}, status=404)
+
+    if request.method == "GET":
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+    if request.method == "PATCH":
+        data = request.data
+        username = data.get("username")
+        email = data.get("email")
+        role = data.get("role")
+        password = data.get("password", None)
+
+        if username is not None:
+            user.username = username
+        if email is not None:
+            user.email = email
+        if role is not None:
+            user.role = role
+        if password is not None and password != "":
+            # For production, hash passwords instead of storing plaintext.
+            user.password = password
+
+        try:
+            user.save()
+        except Exception as e:
+            return Response({"success": False, "message": str(e)}, status=400)
+
+        serializer = UserSerializer(user)
+        return Response({"success": True, "user": serializer.data})
+
+    if request.method == "DELETE":
+        user.delete()
+        return Response({"success": True, "message": "User deleted"})
+    
+@api_view(["POST"])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def create_user(request):
+    data = request.data
+    username = data.get("username")
+    email = data.get("email")
+    role = data.get("role")
+    password = data.get("password")
+
+    if not username or not email or not role or not password:
+        return Response({"success": False, "message": "username, email, role and password are required"}, status=400)
+
+    # Prevent duplicates
+    if Users.objects.filter(username=username).exists():
+        return Response({"success": False, "message": "Username already exists"}, status=400)
+    if Users.objects.filter(email=email).exists():
+        return Response({"success": False, "message": "Email already exists"}, status=400)
+
+    user = Users.objects.create(username=username, email=email, password=password, role=role)
+    serializer = UserSerializer(user)
+    return Response({"success": True, "user": serializer.data}, status=201)

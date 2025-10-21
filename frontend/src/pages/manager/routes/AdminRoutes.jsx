@@ -14,7 +14,7 @@ import AuditPage from "../pages/AuditPage.jsx";
 export default function ManagerRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<DashboardPage />} />
+      <Route path="/*" element={<DashboardPage />} />
       <Route path="customers" element={<CustomersPage />} />
       <Route path="orders" element={<OrdersPage />} />
       <Route path="products" element={<ProductsPage />} />

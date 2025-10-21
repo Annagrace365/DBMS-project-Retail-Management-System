@@ -113,7 +113,33 @@ api.listPayments = async function (params) {
   const { data } = await api.get("/admin/payments/", { params });
   return data;
 };
+// ---------------- Users ----------------
+api.listUsers = async function (params) {
+  const { data } = await api.get("/admin/users/", { params });
+  return data;
+};
 
+api.getUser = async function (id) {
+  const { data } = await api.get(`/admin/users/${id}/`);
+  return data;
+};
+
+api.updateUser = async function (id, payload) {
+  // payload: { username, email, role, password? }
+  const { data } = await api.patch(`/admin/users/${id}/`, payload);
+  return data;
+};
+
+api.deleteUser = async function (id) {
+  const { data } = await api.delete(`/admin/users/${id}/`);
+  return data;
+};
+
+api.createUser = async function (payload) {
+  // payload: { username, email, role, password }
+  const { data } = await api.post("/admin/users/create/", payload);
+  return data;
+};
 // ---------------- KPIs ----------------
 api.getKpis = async function () {
   const { data } = await api.get("/admin/kpis/");
