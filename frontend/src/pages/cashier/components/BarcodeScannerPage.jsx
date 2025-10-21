@@ -130,8 +130,8 @@ export default function BarcodeScannerPage({ onScan }) {
   };
 
   return (
-    <div style={{ textAlign: "center", padding: "30px", fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", background: "#f5f7fa", minHeight: "100vh" }}>
-      <h2 style={{ color: "#0b5fff", marginBottom: "20px" }}>Barcode Scanner</h2>
+    <div style={{ textAlign: "center", padding: "0px", fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", background: "#f5f7fa", minHeight: "100vh" }}>
+      <h2 style={{ color: "#0b5fff", marginBottom: "1px" }}>Barcode Scanner</h2>
 
       {/* Start/Stop Camera Scan */}
       <div>
@@ -144,7 +144,7 @@ export default function BarcodeScannerPage({ onScan }) {
           </button>
         )}
       </div>
-      <video ref={videoRef} style={{ width: "400px", height: "300px", border: "2px solid #0b5fff", borderRadius: "8px", marginTop: "10px" }} />
+      <video ref={videoRef} style={{ width: "300px", height: "150px", border: "2px solid #0b5fff", borderRadius: "8px", marginTop: "10px" }} />
 
       {/* Upload Image Scan */}
       <div style={{ marginTop: "25px" }}>
