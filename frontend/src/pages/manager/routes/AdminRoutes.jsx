@@ -21,8 +21,7 @@ export default function ManagerRoutes() {
       <Route path="suppliers" element={<SuppliersPage />} />
       <Route path="payments" element={<PaymentsPage />} />
       <Route path="reports" element={<ReportsPage />} />
-      <Route path="settings" element={<SettingsPage />} />
-      <Route path="audit" element={<AuditPage />} />
+      
     </Routes>
   );
 }

@@ -9,8 +9,7 @@ const items = [
   { to: "/manager/suppliers", label: "Suppliers" },
   { to: "/manager/payments", label: "Payments" },
   { to: "/manager/reports", label: "Reports" },
-  { to: "/manager/settings", label: "Settings" },
-  { to: "/manager/audit", label: "Audit Log" },
+ 
 ];
 
 export default function Sidebar({ collapsed, onToggle }) {
