@@ -23,6 +23,10 @@ urlpatterns = [
     path("admin/users/<int:pk>/", views.user_detail, name="user-detail"),
 # same path; Django matches by method
     path("admin/users/create/", views.create_user, name="create-user"),
+    path("admin/reports/sales/", views.sales_report, name="sales-report"),
+    path("admin/reports/stock/", views.stock_report, name="stock-report"),
+    path("admin/reports/customer/", views.customer_report, name="customer-report"),
+
 
 
     # Cashier endpoints

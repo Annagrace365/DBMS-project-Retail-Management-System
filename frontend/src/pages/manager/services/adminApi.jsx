@@ -46,6 +46,8 @@ api.deleteCustomer = async function (id) {
 };
 
 // ---------------- Orders ----------------
+
+// ---------------- Orders ----------------
 api.listOrders = async function (params) {
   const { data } = await api.get("/admin/orders/", { params });
   return data;
@@ -108,5 +110,19 @@ api.getKpis = async function () {
   const { data } = await api.get("/admin/kpis/");
   return data;
 };
+// ---------------- Reports ----------------
+api.getSalesReport = async () => {
+  const { data } = await api.get("/admin/reports/sales/");
+  return data;
+};
 
+api.getStockReport = async () => {
+  const { data } = await api.get("/admin/reports/stock/");
+  return data;
+};
+
+api.getCustomerReport = async () => {
+  const { data } = await api.get("/admin/reports/customer/");
+  return data;
+};
 export default api;

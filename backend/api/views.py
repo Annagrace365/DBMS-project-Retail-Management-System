@@ -18,7 +18,10 @@ from .models import Users  # Your custom Users model
 import secrets
 from django.db.models import Q
 from .serializers import OrderSerializer
-
+from .serializers import OrderItemSerializer
+from .serializers import PaymentSerializer  
+import os
+import openai
 # ---------- LOGIN ----------
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -167,10 +170,17 @@ def delete_customer(request, pk):
 @permission_classes([AllowAny])
 @authentication_classes([])
 def list_orders(request):
-    orders = Order.objects.select_related("customer_id", "cashier").all().order_by("-order_date")
+    # Fetch all orders with related customer and cashier (for performance)
+    orders = (
+        Order.objects
+        .select_related("customer_id", "cashier")
+        .all()
+        .order_by("-order_id")  # 👈 Sorts by order_id descending
+    )
+    
+    # Serialize and return
     serializer = OrderListSerializer(orders, many=True)
     return Response(serializer.data)
-
 
 # GET ORDER DETAILS
 @api_view(["GET"])
@@ -480,3 +490,102 @@ def create_user(request):
     user = Users.objects.create(username=username, email=email, password=password, role=role)
     serializer = UserSerializer(user)
     return Response({"success": True, "user": serializer.data}, status=201)
+
+
+openai.api_key = os.getenv("REMOVED_SECRETproj-usRDS-BOxj2i7t6o4MnCX6OagAo_LBXcgWYfuLewCqHpV8GO5KfA1vQKJRDRnuwHSFqfR-36b6T3BlbkFJonHKVfjH37sQMs2fU1chLvdba_guCtT2S0nDN9xUTIxQi-BdLvn_Jm7_shFRHE1ExqMFIC0mcA")
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def sales_report(request):
+    today = date.today()
+    start_date = today - timedelta(days=30)
+    orders = Order.objects.filter(order_date__gte=start_date)
+
+    total_sales = orders.aggregate(total=Sum('amount'))['total'] or 0
+    total_orders = orders.count()
+
+    top_products = (
+        OrderItem.objects.filter(order_id__order_date__gte=start_date)
+        .values('product_id__name')
+        .annotate(qty_sold=Sum('quantity'))
+        .order_by('-qty_sold')[:5]
+    )
+
+    # AI summary
+    text_to_summarize = f"Total sales: {total_sales}, Total orders: {total_orders}, Top products: {list(top_products)}"
+    summary = ""
+    try:
+        completion = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": f"Provide a concise summary and insights for this sales data: {text_to_summarize}"}]
+        )
+        summary = completion.choices[0].message.content
+    except Exception as e:
+        summary = f"AI summary failed: {str(e)}"
+
+    return Response({
+        "total_sales": float(total_sales),
+        "total_orders": total_orders,
+        "top_products": list(top_products),
+        "ai_summary": summary
+    })
+
+# ---------------- Stock Report ----------------
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def stock_report(request):
+    products = Product.objects.all()
+    low_stock_threshold = 5
+    low_stock = products.filter(stock__lt=low_stock_threshold)
+
+    text_to_summarize = f"Low stock products: {[p.name for p in low_stock]}"
+    summary = ""
+    try:
+        completion = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": f"Provide inventory insights for: {text_to_summarize}"}]
+        )
+        summary = completion.choices[0].message.content
+    except Exception as e:
+        summary = f"AI summary failed: {str(e)}"
+
+    return Response({
+        "products": [{"name": p.name, "stock": p.stock} for p in products],
+        "low_stock": [{"name": p.name, "stock": p.stock} for p in low_stock],
+        "ai_summary": summary
+    })
+
+# ---------------- Customer Report ----------------
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def customer_report(request):
+    customers = Customer.objects.annotate(
+        total_orders=Count('order'),
+        total_spent=Sum('order__amount')
+    )
+    top_customers = customers.order_by('-total_spent')[:5]
+
+    text_to_summarize = f"Top customers: {[c.name for c in top_customers]}"
+    summary = ""
+    try:
+        completion = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": f"Provide insights for these top customers: {text_to_summarize}"}]
+        )
+        summary = completion.choices[0].message.content
+    except Exception as e:
+        summary = f"AI summary failed: {str(e)}"
+
+    return Response({
+        "customers": [
+            {"name": c.name, "total_orders": c.total_orders or 0, "total_spent": float(c.total_spent or 0)}
+            for c in customers
+        ],
+        "top_customers": [
+            {"name": c.name, "total_orders": c.total_orders or 0, "total_spent": float(c.total_spent or 0)}
+            for c in top_customers
+        ],
+        "ai_summary": summary
+    })
