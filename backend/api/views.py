@@ -493,7 +493,8 @@ def create_user(request):
     return Response({"success": True, "user": serializer.data}, status=201)
 
 
-openai.api_key = os.getenv("openai_key")
+
+# ---------------- Sales Report ----------------
 @api_view(["GET"])
 @permission_classes([AllowAny])
 @authentication_classes([])
@@ -504,7 +505,6 @@ def sales_report(request):
 
     total_sales = orders.aggregate(total=Sum('amount'))['total'] or 0
     total_orders = orders.count()
-
     top_products = (
         OrderItem.objects.filter(order_id__order_date__gte=start_date)
         .values('product_id__name')
@@ -512,23 +512,10 @@ def sales_report(request):
         .order_by('-qty_sold')[:5]
     )
 
-    # AI summary
-    text_to_summarize = f"Total sales: {total_sales}, Total orders: {total_orders}, Top products: {list(top_products)}"
-    summary = ""
-    try:
-        completion = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": f"Provide a concise summary and insights for this sales data: {text_to_summarize}"}]
-        )
-        summary = completion.choices[0].message.content
-    except Exception as e:
-        summary = f"AI summary failed: {str(e)}"
-
     return Response({
         "total_sales": float(total_sales),
         "total_orders": total_orders,
-        "top_products": list(top_products),
-        "ai_summary": summary
+        "top_products": list(top_products)
     })
 
 # ---------------- Stock Report ----------------
@@ -537,24 +524,11 @@ def sales_report(request):
 @authentication_classes([])
 def stock_report(request):
     products = Product.objects.all()
-    low_stock_threshold = 5
-    low_stock = products.filter(stock__lt=low_stock_threshold)
-
-    text_to_summarize = f"Low stock products: {[p.name for p in low_stock]}"
-    summary = ""
-    try:
-        completion = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": f"Provide inventory insights for: {text_to_summarize}"}]
-        )
-        summary = completion.choices[0].message.content
-    except Exception as e:
-        summary = f"AI summary failed: {str(e)}"
+    low_stock = products.filter(stock__lt=5)
 
     return Response({
         "products": [{"name": p.name, "stock": p.stock} for p in products],
-        "low_stock": [{"name": p.name, "stock": p.stock} for p in low_stock],
-        "ai_summary": summary
+        "low_stock": [{"name": p.name, "stock": p.stock} for p in low_stock]
     })
 
 # ---------------- Customer Report ----------------
@@ -568,17 +542,6 @@ def customer_report(request):
     )
     top_customers = customers.order_by('-total_spent')[:5]
 
-    text_to_summarize = f"Top customers: {[c.name for c in top_customers]}"
-    summary = ""
-    try:
-        completion = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": f"Provide insights for these top customers: {text_to_summarize}"}]
-        )
-        summary = completion.choices[0].message.content
-    except Exception as e:
-        summary = f"AI summary failed: {str(e)}"
-
     return Response({
         "customers": [
             {"name": c.name, "total_orders": c.total_orders or 0, "total_spent": float(c.total_spent or 0)}
@@ -587,6 +550,5 @@ def customer_report(request):
         "top_customers": [
             {"name": c.name, "total_orders": c.total_orders or 0, "total_spent": float(c.total_spent or 0)}
             for c in top_customers
-        ],
-        "ai_summary": summary
+        ]
     })
