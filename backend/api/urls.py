@@ -23,13 +23,10 @@ urlpatterns = [
     path("admin/users/<int:pk>/", views.user_detail, name="user-detail"),
 # same path; Django matches by method
     path("admin/users/create/", views.create_user, name="create-user"),
-<<<<<<< HEAD
-=======
     path("admin/reports/sales/", views.sales_report, name="sales-report"),
     path("admin/reports/stock/", views.stock_report, name="stock-report"),
     path("admin/reports/customer/", views.customer_report, name="customer-report"),
 
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
 
 
     # Cashier endpoints
@@ -37,9 +34,6 @@ urlpatterns = [
     path('cashier/orders/', views.CreateOrderView.as_view(), name='create-order'),
     path('cashier/orders/<int:order_id>/add-item/', views.AddItemToOrderView.as_view(), name='add-item-to-order'),
     path('cashier/orders/<int:order_id>/complete-sale/', views.CompleteSaleView.as_view(), name='complete-sale'),
-<<<<<<< HEAD
-    path('api/products/barcode/<str:barcode>/', views.get_product_by_barcode),
+    path('products/barcode/<str:barcode>/', views.get_product_by_barcode),
 
-=======
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
 ]

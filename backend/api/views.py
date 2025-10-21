@@ -18,13 +18,9 @@ from .models import Users  # Your custom Users model
 import secrets
 from django.db.models import Q
 from .serializers import OrderSerializer
-<<<<<<< HEAD
-=======
 from .serializers import OrderItemSerializer
 from .serializers import PaymentSerializer  
 import os
-import openai
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
 
 # ---------- LOGIN ----------
 class LoginView(APIView):
@@ -174,13 +170,11 @@ def delete_customer(request, pk):
 @permission_classes([AllowAny])
 @authentication_classes([])
 def list_orders(request):
-<<<<<<< HEAD
     orders = Order.objects.select_related("customer_id", "cashier").all().order_by("-order_date")
     serializer = OrderListSerializer(orders, many=True)
     return Response(serializer.data)
 
 
-=======
     # Fetch all orders with related customer and cashier (for performance)
     orders = (
         Order.objects
@@ -193,7 +187,6 @@ def list_orders(request):
     serializer = OrderListSerializer(orders, many=True)
     return Response(serializer.data)
 
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
 # GET ORDER DETAILS
 @api_view(["GET"])
 @permission_classes([AllowAny])
@@ -504,7 +497,6 @@ def create_user(request):
     return Response({"success": True, "user": serializer.data}, status=201)
 
 
-<<<<<<< HEAD
 @api_view(['GET'])
 def get_product_by_barcode(request, barcode):
     try:
@@ -517,7 +509,6 @@ def get_product_by_barcode(request, barcode):
         })
     except Product.DoesNotExist:
         return Response({"error": "Product not found"}, status=404)
-=======
 
 # ---------------- Sales Report ----------------
 @api_view(["GET"])
@@ -577,4 +568,3 @@ def customer_report(request):
             for c in top_customers
         ]
     })
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690

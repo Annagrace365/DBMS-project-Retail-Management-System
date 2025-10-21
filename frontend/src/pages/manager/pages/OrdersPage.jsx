@@ -5,10 +5,7 @@ import api from "../services/adminApi";
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-<<<<<<< HEAD
-=======
   const [selectedOrder, setSelectedOrder] = useState(null);
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -22,8 +19,6 @@ export default function OrdersPage() {
     }
   };
 
-<<<<<<< HEAD
-=======
   const handleViewOrder = async (orderId) => {
     try {
       const data = await api.getOrder(orderId);
@@ -35,29 +30,14 @@ export default function OrdersPage() {
 
   const closeModal = () => setSelectedOrder(null);
 
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
   useEffect(() => {
     fetchOrders();
   }, []);
 
-<<<<<<< HEAD
-
-
-  return (
-    <AdminLayout>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 24 }}>
-        <h2 style={{ fontSize: 24, fontWeight: 600 }}>Orders</h2>
-
-      </div>
-
-      {/* Orders Table */}
-=======
   return (
     <AdminLayout>
       <h2 style={{ fontSize: 24, fontWeight: 600, marginBottom: 24 }}>Orders</h2>
 
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
       <div
         style={{
           backgroundColor: "#fff",
@@ -74,71 +54,36 @@ export default function OrdersPage() {
               <tr>
                 <th style={{ padding: 8, border: "1px solid #ddd" }}>Order #</th>
                 <th style={{ padding: 8, border: "1px solid #ddd" }}>Customer</th>
-<<<<<<< HEAD
-                <th style={{ padding: 8, border: "1px solid #ddd" }}>Total</th>
-                <th style={{ padding: 8, border: "1px solid #ddd" }}>Date</th>
-=======
                 <th style={{ padding: 8, border: "1px solid #ddd" }}>Cashier</th>
                 <th style={{ padding: 8, border: "1px solid #ddd" }}>Amount</th>
                 <th style={{ padding: 8, border: "1px solid #ddd" }}>Date</th>
                 <th style={{ padding: 8, border: "1px solid #ddd" }}>Status</th>
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
                 <th style={{ padding: 8, border: "1px solid #ddd" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {orders.map((o) => (
-<<<<<<< HEAD
-                <tr key={o.id}>
-                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{o.order_number}</td>
-                  <td style={{ padding: 8, border: "1px solid #ddd" }}>{o.customer_name || "-"}</td>
-=======
                 <tr key={o.order_number}>
                   <td style={{ padding: 8, border: "1px solid #ddd" }}>{o.order_number}</td>
                   <td style={{ padding: 8, border: "1px solid #ddd" }}>{o.customer_name || "-"}</td>
                   <td style={{ padding: 8, border: "1px solid #ddd" }}>{o.cashier_name || "-"}</td>
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
                   <td style={{ padding: 8, border: "1px solid #ddd" }}>₹ {o.total}</td>
                   <td style={{ padding: 8, border: "1px solid #ddd" }}>
                     {new Date(o.created_at).toLocaleDateString()}
                   </td>
-<<<<<<< HEAD
-                  <td style={{ padding: 8, border: "1px solid #ddd" }}>
-                    <button
-                      style={{
-                        marginRight: 8,
-=======
                   <td style={{ padding: 8, border: "1px solid #ddd" }}>{o.status}</td>
                   <td style={{ padding: 8, border: "1px solid #ddd" }}>
                     <button
                       style={{
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
                         padding: "4px 8px",
                         backgroundColor: "#facc15",
                         borderRadius: 4,
                         cursor: "pointer",
                       }}
-<<<<<<< HEAD
-                    >
-                      View
-                    </button>
-                    <button
-                      style={{
-                        padding: "4px 8px",
-                        backgroundColor: "#3b82f6",
-                        color: "#fff",
-                        borderRadius: 4,
-                        cursor: "pointer",
-                      }}
-                    >
-                      Invoice
-                    </button>
-=======
                       onClick={() => handleViewOrder(o.order_number)}
                     >
                       View
                     </button>
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
                   </td>
                 </tr>
               ))}
@@ -148,8 +93,6 @@ export default function OrdersPage() {
           <div style={{ color: "#6b7280", marginTop: 8 }}>No orders found</div>
         )}
       </div>
-<<<<<<< HEAD
-=======
 
       {/* Modal */}
       {selectedOrder && (
@@ -226,7 +169,6 @@ export default function OrdersPage() {
           </div>
         </div>
       )}
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
     </AdminLayout>
   );
 }

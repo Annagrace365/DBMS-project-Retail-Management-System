@@ -9,10 +9,7 @@ import Transactions from "../components/Transactions";
 import Returns from "../components/Returns";
 import OrdersPage from "../components/OrdersPage";
 import ProfilePage from "../components/ProfilePage";
-<<<<<<< HEAD
-=======
 import BarcodeScannerPage from "../components/BarcodeScannerPage"; // ✅ new import
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
 
 
 /**
@@ -23,7 +20,7 @@ export default function CashierRoutes() {
   return (
     <Routes>
       {/* Parent route: CashierLayout includes Sidebar/Topbar and Outlet */}
-      <Route path="/" element={<CashierLayout />}>
+      <Route path="/*" element={<CashierLayout />}>
         {/* index -> /cashier  */}
         <Route index element={<CashierIndex />} />
         <Route path="dashboard" element={<CashierIndex />} />
@@ -32,13 +29,10 @@ export default function CashierRoutes() {
         <Route path="pos" element={<InPOS />} />
         <Route path="billing" element={<InPOS />} />
 
-<<<<<<< HEAD
-=======
         {/* ✅ Barcode Scanner */}
         <Route path="barcode-scanner" element={<BarcodeScannerPage />} />
 
 
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
         {/* Holds */}
         <Route path="hold-invoices" element={<HoldInvoices />} />
 

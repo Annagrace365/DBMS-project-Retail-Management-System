@@ -1,83 +1,49 @@
-<<<<<<< HEAD
-=======
-// src/pages/cashier/services/cashierApi.js
-/**
- * Mock cashier API service file.
- * Replace functions with real API calls when backend is available.
- *
- * For demo purposes:
- * - saveTransaction(txn) returns the txn with the same id after a small delay.
- * - fetchProducts(query) can be implemented later.
- */
-
-
-
-
-
-
-
-
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
 import axios from "axios";
 
+// Create an Axios instance for making API calls
 const api = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: "http://localhost:8000/api", // Your backend base URL
   headers: { "Content-Type": "application/json" },
 });
 
-<<<<<<< HEAD
-// Mock save transaction (can keep as-is)
+// Mock save transaction (this can remain as is)
 export function saveTransaction(txn) {
   return new Promise((resolve) => {
     setTimeout(() => {
-=======
-export function saveTransaction(txn) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // simply return the passed transaction (simulate server-assigned id)
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
-      resolve({ ...txn });
+      resolve({ ...txn }); // Simply returns the passed transaction
     }, 250);
   });
 }
 
-// Fetch all products (from admin endpoint)
+// Fetch all products (from the admin endpoint)
 export const fetchProducts = async (search = "") => {
   try {
-<<<<<<< HEAD
-    const res = await api.get("/admin/products/"); // your existing endpoint
-    if (!search) return res.data;
-    return res.data.filter(p => 
+    const res = await api.get("/admin/products/"); // Fetch products from your backend
+
+    if (!search) return res.data; // Return all products if no search query
+
+    // Filter products client-side based on name or barcode matching search term
+    return res.data.filter((p) => 
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       (p.barcode && p.barcode.includes(search))
     );
-=======
-    const res = await api.get("/admin/products/");
-    // Filter client-side
-    if (!search) return res.data;
-    return res.data.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
   } catch (err) {
     console.error("Error fetching products:", err);
-    throw err;
+    throw err; // Rethrow error for handling in components
   }
 };
 
-<<<<<<< HEAD
-// ---- New function: fetch a product by barcode ----
+// Fetch product by barcode (new function)
 export const fetchProductByBarcode = async (barcode) => {
-  if (!barcode) throw new Error("Barcode is required");
+  if (!barcode) throw new Error("Barcode is required"); // Ensure barcode is passed
+
   try {
-    const res = await api.get(`/products/barcode/${barcode}/`);
-    return res.data; // Should return { id, name, price, barcode }
+    const res = await api.get(`/products/barcode/${barcode}/`); // API endpoint to fetch product by barcode
+    return res.data; // Return the product details
   } catch (err) {
     console.error("Error fetching product by barcode:", err);
-    throw err;
+    throw err; // Rethrow error for handling in components
   }
 };
 
 export default api;
-=======
-export default api;
-
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690

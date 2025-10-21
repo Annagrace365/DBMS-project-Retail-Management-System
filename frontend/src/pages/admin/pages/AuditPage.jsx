@@ -1,31 +1,10 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../components/layout/AdminLayout";
-<<<<<<< HEAD
-import Table from "../components/ui/Table";
-import api from "../services/adminApi";
-=======
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
 
 export default function AuditPage() {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
-<<<<<<< HEAD
-    api.listAuditLogs?.().then((d) => setLogs(d || []));
-  }, []);
-
-  const cols = [
-    { key: "user", title: "User" },
-    { key: "action", title: "Action" },
-    { key: "entity", title: "Entity" },
-    { key: "timestamp", title: "Time" },
-  ];
-
-  return (
-    <AdminLayout>
-      <h2 className="text-xl font-semibold mb-4">Audit Log</h2>
-      <Table columns={cols} data={logs} />
-=======
     const mockLogs = [
       { user: "Admin", action: "Created", entity: "Product: Milk 1L", timestamp: "2025-10-21 09:00:12" },
       { user: "Admin", action: "Updated", entity: "Customer: John Doe", timestamp: "2025-10-21 09:05:23" },
@@ -92,7 +71,6 @@ export default function AuditPage() {
           </tbody>
         </table>
       </div>
->>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
     </AdminLayout>
   );
 }
