@@ -8,6 +8,8 @@ const items = [
   { to: "/admin/products", label: "Products" },
   { to: "/admin/suppliers", label: "Suppliers" },
   { to: "/admin/payments", label: "Payments" },
+    { to: "/admin/users", label: "Users" },
+
   { to: "/admin/reports", label: "Reports" },
   { to: "/admin/settings", label: "Settings" },
   { to: "/admin/audit", label: "Audit Log" },

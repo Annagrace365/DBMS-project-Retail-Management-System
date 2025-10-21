@@ -18,6 +18,11 @@ urlpatterns = [
     path("admin/orders/<int:pk>/", views.get_order, name="get-order"),
     path("admin/suppliers/<int:pk>/update/", views.patch_supplier, name="update-supplier"),
     path("admin/suppliers/<int:pk>/", views.delete_supplier, name="delete-supplier"),
+    # Users CRUD
+    path("admin/users/", views.list_users, name="list-users"),
+    path("admin/users/<int:pk>/", views.user_detail, name="user-detail"),
+# same path; Django matches by method
+    path("admin/users/create/", views.create_user, name="create-user"),
 
 
     # Cashier endpoints
