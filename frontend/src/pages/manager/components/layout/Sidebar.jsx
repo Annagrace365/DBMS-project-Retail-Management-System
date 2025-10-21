@@ -9,8 +9,12 @@ const items = [
   { to: "/manager/suppliers", label: "Suppliers" },
   { to: "/manager/payments", label: "Payments" },
   { to: "/manager/reports", label: "Reports" },
+<<<<<<< HEAD
   { to: "/manager/settings", label: "Settings" },
   { to: "/manager/audit", label: "Audit Log" },
+=======
+ 
+>>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
 ];
 
 export default function Sidebar({ collapsed, onToggle }) {

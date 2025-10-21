@@ -18,6 +18,13 @@ from .models import Users  # Your custom Users model
 import secrets
 from django.db.models import Q
 from .serializers import OrderSerializer
+<<<<<<< HEAD
+=======
+from .serializers import OrderItemSerializer
+from .serializers import PaymentSerializer  
+import os
+import openai
+>>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
 
 # ---------- LOGIN ----------
 class LoginView(APIView):
@@ -167,11 +174,26 @@ def delete_customer(request, pk):
 @permission_classes([AllowAny])
 @authentication_classes([])
 def list_orders(request):
+<<<<<<< HEAD
     orders = Order.objects.select_related("customer_id", "cashier").all().order_by("-order_date")
     serializer = OrderListSerializer(orders, many=True)
     return Response(serializer.data)
 
 
+=======
+    # Fetch all orders with related customer and cashier (for performance)
+    orders = (
+        Order.objects
+        .select_related("customer_id", "cashier")
+        .all()
+        .order_by("-order_id")  # 👈 Sorts by order_id descending
+    )
+    
+    # Serialize and return
+    serializer = OrderListSerializer(orders, many=True)
+    return Response(serializer.data)
+
+>>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
 # GET ORDER DETAILS
 @api_view(["GET"])
 @permission_classes([AllowAny])
@@ -482,6 +504,7 @@ def create_user(request):
     return Response({"success": True, "user": serializer.data}, status=201)
 
 
+<<<<<<< HEAD
 @api_view(['GET'])
 def get_product_by_barcode(request, barcode):
     try:
@@ -494,3 +517,64 @@ def get_product_by_barcode(request, barcode):
         })
     except Product.DoesNotExist:
         return Response({"error": "Product not found"}, status=404)
+=======
+
+# ---------------- Sales Report ----------------
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def sales_report(request):
+    today = date.today()
+    start_date = today - timedelta(days=30)
+    orders = Order.objects.filter(order_date__gte=start_date)
+
+    total_sales = orders.aggregate(total=Sum('amount'))['total'] or 0
+    total_orders = orders.count()
+    top_products = (
+        OrderItem.objects.filter(order_id__order_date__gte=start_date)
+        .values('product_id__name')
+        .annotate(qty_sold=Sum('quantity'))
+        .order_by('-qty_sold')[:5]
+    )
+
+    return Response({
+        "total_sales": float(total_sales),
+        "total_orders": total_orders,
+        "top_products": list(top_products)
+    })
+
+# ---------------- Stock Report ----------------
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def stock_report(request):
+    products = Product.objects.all()
+    low_stock = products.filter(stock__lt=5)
+
+    return Response({
+        "products": [{"name": p.name, "stock": p.stock} for p in products],
+        "low_stock": [{"name": p.name, "stock": p.stock} for p in low_stock]
+    })
+
+# ---------------- Customer Report ----------------
+@api_view(["GET"])
+@permission_classes([AllowAny])
+@authentication_classes([])
+def customer_report(request):
+    customers = Customer.objects.annotate(
+        total_orders=Count('order'),
+        total_spent=Sum('order__amount')
+    )
+    top_customers = customers.order_by('-total_spent')[:5]
+
+    return Response({
+        "customers": [
+            {"name": c.name, "total_orders": c.total_orders or 0, "total_spent": float(c.total_spent or 0)}
+            for c in customers
+        ],
+        "top_customers": [
+            {"name": c.name, "total_orders": c.total_orders or 0, "total_spent": float(c.total_spent or 0)}
+            for c in top_customers
+        ]
+    })
+>>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690

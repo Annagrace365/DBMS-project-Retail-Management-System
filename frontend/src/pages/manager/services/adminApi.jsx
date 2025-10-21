@@ -46,6 +46,11 @@ api.deleteCustomer = async function (id) {
 };
 
 // ---------------- Orders ----------------
+<<<<<<< HEAD
+=======
+
+// ---------------- Orders ----------------
+>>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
 api.listOrders = async function (params) {
   const { data } = await api.get("/admin/orders/", { params });
   return data;
@@ -108,5 +113,23 @@ api.getKpis = async function () {
   const { data } = await api.get("/admin/kpis/");
   return data;
 };
+<<<<<<< HEAD
 
+=======
+// ---------------- Reports ----------------
+api.getSalesReport = async () => {
+  const { data } = await api.get("/admin/reports/sales/");
+  return data;
+};
+
+api.getStockReport = async () => {
+  const { data } = await api.get("/admin/reports/stock/");
+  return data;
+};
+
+api.getCustomerReport = async () => {
+  const { data } = await api.get("/admin/reports/customer/");
+  return data;
+};
+>>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
 export default api;

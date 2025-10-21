@@ -1,15 +1,26 @@
 // src/pages/cashier/components/Sidebar.jsx
 import React from "react";
 import { NavLink } from "react-router-dom";
+<<<<<<< HEAD
 
 /**
  * Sidebar: navigation links for cashier module.
  * Keep markup simple — style with your project's global CSS or modify inline styles here.
+=======
+import { FaBarcode } from "react-icons/fa"; // import barcode icon
+
+/**
+ * Sidebar: navigation links for cashier module.
+>>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
  */
 export default function Sidebar() {
   const linkStyle = ({ isActive }) => ({
     display: "flex",
     alignItems: "center",
+<<<<<<< HEAD
+=======
+    gap: "10px", // add spacing for icon + text
+>>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
     padding: "12px 16px",
     textDecoration: "none",
     color: isActive ? "#0b5fff" : "#2d3748",
@@ -35,6 +46,15 @@ export default function Sidebar() {
         <NavLink to="returns" style={linkStyle}>Returns</NavLink>
         <NavLink to="orders" style={linkStyle}>Orders</NavLink>
         <NavLink to="profile" style={linkStyle}>Profile</NavLink>
+<<<<<<< HEAD
+=======
+
+        {/* ✅ New Barcode Scanner Link */}
+        <NavLink to="barcode-scanner" style={linkStyle}>
+          <FaBarcode size={18} />
+          <span>Barcode Scanner</span>
+        </NavLink>
+>>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
       </nav>
 
       <div style={{ marginTop: 28, fontSize: 12, color: "#94a3b8" }}>
@@ -42,4 +62,8 @@ export default function Sidebar() {
       </div>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 1fb7ec3f6399ddd0dfbc3498b36d96641de8f690
