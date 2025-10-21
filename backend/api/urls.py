@@ -30,4 +30,6 @@ urlpatterns = [
     path('cashier/orders/', views.CreateOrderView.as_view(), name='create-order'),
     path('cashier/orders/<int:order_id>/add-item/', views.AddItemToOrderView.as_view(), name='add-item-to-order'),
     path('cashier/orders/<int:order_id>/complete-sale/', views.CompleteSaleView.as_view(), name='complete-sale'),
+    path('api/products/barcode/<str:barcode>/', views.get_product_by_barcode),
+
 ]

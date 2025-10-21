@@ -1,20 +1,3 @@
-// src/pages/cashier/services/cashierApi.js
-/**
- * Mock cashier API service file.
- * Replace functions with real API calls when backend is available.
- *
- * For demo purposes:
- * - saveTransaction(txn) returns the txn with the same id after a small delay.
- * - fetchProducts(query) can be implemented later.
- */
-
-
-
-
-
-
-
-
 import axios from "axios";
 
 const api = axios.create({
@@ -22,10 +5,10 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// Mock save transaction (can keep as-is)
 export function saveTransaction(txn) {
   return new Promise((resolve) => {
     setTimeout(() => {
-      // simply return the passed transaction (simulate server-assigned id)
       resolve({ ...txn });
     }, 250);
   });
@@ -34,15 +17,28 @@ export function saveTransaction(txn) {
 // Fetch all products (from admin endpoint)
 export const fetchProducts = async (search = "") => {
   try {
-    const res = await api.get("/admin/products/");
-    // Filter client-side
+    const res = await api.get("/admin/products/"); // your existing endpoint
     if (!search) return res.data;
-    return res.data.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+    return res.data.filter(p => 
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      (p.barcode && p.barcode.includes(search))
+    );
   } catch (err) {
     console.error("Error fetching products:", err);
     throw err;
   }
 };
 
-export default api;
+// ---- New function: fetch a product by barcode ----
+export const fetchProductByBarcode = async (barcode) => {
+  if (!barcode) throw new Error("Barcode is required");
+  try {
+    const res = await api.get(`/products/barcode/${barcode}/`);
+    return res.data; // Should return { id, name, price, barcode }
+  } catch (err) {
+    console.error("Error fetching product by barcode:", err);
+    throw err;
+  }
+};
 
+export default api;

@@ -480,3 +480,17 @@ def create_user(request):
     user = Users.objects.create(username=username, email=email, password=password, role=role)
     serializer = UserSerializer(user)
     return Response({"success": True, "user": serializer.data}, status=201)
+
+
+@api_view(['GET'])
+def get_product_by_barcode(request, barcode):
+    try:
+        product = Product.objects.get(barcode=barcode)
+        return Response({
+            "id": product.product_id,
+            "name": product.name,
+            "price": float(product.price),
+            "barcode": product.barcode
+        })
+    except Product.DoesNotExist:
+        return Response({"error": "Product not found"}, status=404)

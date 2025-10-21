@@ -1,17 +1,8 @@
-// src/pages/cashier/components/InPOS.jsx
 import React, { useState } from "react";
 import { useCashier } from "./CashierContext";
-// removed mockProducts import and use backend fetch
-import { fetchProducts } from "../services/cashierApi";
+import { fetchProducts, fetchProductByBarcode } from "../services/cashierApi";
+import BarcodeScannerPage from "./BarcodeScannerPage"; // Import BarcodeScannerPage component
 
-/**
- * InPOS: full POS interface (frontend-only, no backend)
- * - Search products by name / barcode
- * - Add item to cart
- * - Update qty / remove
- * - Hold invoice
- * - Complete sale (mock)
- */
 export default function InPOS() {
   const {
     currentCart,
@@ -26,7 +17,7 @@ export default function InPOS() {
   const [searchResults, setSearchResults] = useState([]);
   const [manualItem, setManualItem] = useState({ name: "", price: "" });
 
-  // --------- CHANGED: search now queries the DB and maps results to cart shape ----------
+  // Search products by name or barcode
   async function handleSearch(q) {
     setQuery(q);
     if (!q) {
@@ -35,17 +26,13 @@ export default function InPOS() {
     }
 
     try {
-      // fetchProducts will call your backend endpoint (e.g. /api/admin/products/)
-      const products = await fetchProducts(q); // fetchProducts may filter server-side or return all
-      // Map backend product shape to the shape expected by the cart functions
-      // backend product fields: product_id, sku, name, price, stock
+      const products = await fetchProducts(q);
       const mapped = products.map((p) => ({
-        id: p.product_id,          // matches original mockProducts.id
-        barcode: p.sku || "",      // preserve barcode field used in original search logic
+        id: p.product_id,
+        barcode: p.barcode || "",
         name: p.name,
-        price: parseFloat(p.price), // ensure number
+        price: parseFloat(p.price),
       }));
-      // Filter by query (in case backend returns all); keep original behavior (name or barcode)
       const res = mapped.filter(
         (p) =>
           p.name.toLowerCase().includes(q.toLowerCase()) ||
@@ -54,20 +41,40 @@ export default function InPOS() {
       setSearchResults(res.slice(0, 10));
     } catch (err) {
       console.error("Failed to fetch products", err);
-      // fallback to empty results if fetch fails
       setSearchResults([]);
     }
   }
-  // -------------------------------------------------------------------------------
+
+  // Handle scanned barcode and add product automatically
+  const handleBarcodeScanned = async (barcode) => {
+    if (!barcode) return;
+    try {
+      const product = await fetchProductByBarcode(barcode); // backend API
+      if (product && product.id) {
+        addItemToCart({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          barcode: product.barcode,
+        });
+      } else {
+        alert(`Product not found for scanned barcode: ${barcode}`);
+      }
+    } catch (err) {
+      console.error("Error fetching product by barcode", err);
+      alert(`Product not found for scanned barcode: ${barcode}`);
+    }
+  };
 
   async function handleCompleteSale() {
-    const payment = { method: "cash" }; // simplified
+    const payment = { method: "cash" };
     const saved = await completeSale(payment);
     alert(`Sale completed: ${saved.id}`);
   }
 
   return (
-    <div style={{ display: "flex", gap: 20 }}>
+    <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+      {/* Left Side: POS & Cart */}
       <section style={{ flex: 1 }}>
         <h2>Point of Sale</h2>
 
@@ -207,10 +214,7 @@ export default function InPOS() {
                         type="number"
                         min={1}
                         onChange={(e) =>
-                          updateQty(
-                            it.id,
-                            parseInt(e.target.value || "0", 10)
-                          )
+                          updateQty(it.id, parseInt(e.target.value || "0", 10))
                         }
                         style={{ width: 60 }}
                       />
@@ -233,8 +237,17 @@ export default function InPOS() {
         </div>
       </section>
 
-      {/* Summary Sidebar */}
-      <aside style={{ width: 320 }}>
+      {/* Right Side: Summary + Barcode Scanner */}
+      <aside
+        style={{
+          width: 320,
+          display: "flex",
+          flexDirection: "column",
+          gap: 20,
+          alignItems: "stretch",
+        }}
+      >
+        {/* Payment / Summary */}
         <div style={{ padding: 16, background: "#fff", borderRadius: 8 }}>
           <h3>Summary</h3>
           <div>Subtotal: ₹ {currentCart.totals.subtotal.toFixed(2)}</div>
@@ -242,15 +255,8 @@ export default function InPOS() {
           <div style={{ fontWeight: 700, marginTop: 8 }}>
             Total: ₹ {currentCart.totals.total.toFixed(2)}
           </div>
-
           <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-            <button
-              onClick={() => {
-                const h = holdInvoice();
-                alert("Held: " + h.id);
-              }}
-              style={styles.holdBtn}
-            >
+            <button onClick={() => holdInvoice()} style={styles.holdBtn}>
               Hold
             </button>
             <button onClick={handleCompleteSale} style={styles.payBtn}>
@@ -258,50 +264,20 @@ export default function InPOS() {
             </button>
           </div>
         </div>
+
+        {/* Barcode Scanner with onScan */}
+        <div style={{ flex: 1 }}>
+          <BarcodeScannerPage onScan={handleBarcodeScanned} />
+        </div>
       </aside>
     </div>
   );
 }
 
 const styles = {
-  addBtn: {
-    padding: "6px 10px",
-    background: "#10b981",
-    color: "#fff",
-    border: "none",
-    borderRadius: 6,
-    cursor: "pointer",
-  },
-  removeBtn: {
-    padding: "6px 8px",
-    background: "transparent",
-    border: "1px solid #f87171",
-    color: "#ef4444",
-    borderRadius: 6,
-    cursor: "pointer",
-  },
-  holdBtn: {
-    flex: 1,
-    padding: "8px 10px",
-    background: "#f59e0b",
-    color: "#fff",
-    border: "none",
-    borderRadius: 6,
-    cursor: "pointer",
-  },
-  payBtn: {
-    flex: 1,
-    padding: "8px 10px",
-    background: "#0b5fff",
-    color: "#fff",
-    border: "none",
-    borderRadius: 6,
-    cursor: "pointer",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    background: "#fff",
-    marginTop: 8,
-  },
+  addBtn: { padding: "6px 10px", background: "#10b981", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer" },
+  removeBtn: { padding: "6px 8px", background: "transparent", border: "1px solid #f87171", color: "#ef4444", borderRadius: 6, cursor: "pointer" },
+  holdBtn: { flex: 1, padding: "8px 10px", background: "#f59e0b", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer" },
+  payBtn: { flex: 1, padding: "8px 10px", background: "#0b5fff", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer" },
+  table: { width: "100%", borderCollapse: "collapse", background: "#fff", marginTop: 8 },
 };

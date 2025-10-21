@@ -9,7 +9,6 @@ import Transactions from "../components/Transactions";
 import Returns from "../components/Returns";
 import OrdersPage from "../components/OrdersPage";
 import ProfilePage from "../components/ProfilePage";
-import BarcodeScannerPage from "../components/BarcodeScannerPage"; // ✅ new import
 
 
 /**
@@ -28,10 +27,6 @@ export default function CashierRoutes() {
         {/* POS / billing */}
         <Route path="pos" element={<InPOS />} />
         <Route path="billing" element={<InPOS />} />
-
-        {/* ✅ Barcode Scanner */}
-        <Route path="barcode-scanner" element={<BarcodeScannerPage />} />
-
 
         {/* Holds */}
         <Route path="hold-invoices" element={<HoldInvoices />} />

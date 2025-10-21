@@ -1,16 +1,15 @@
 // src/pages/cashier/components/Sidebar.jsx
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { FaBarcode } from "react-icons/fa"; // import barcode icon
 
 /**
  * Sidebar: navigation links for cashier module.
+ * Keep markup simple — style with your project's global CSS or modify inline styles here.
  */
 export default function Sidebar() {
   const linkStyle = ({ isActive }) => ({
     display: "flex",
     alignItems: "center",
-    gap: "10px", // add spacing for icon + text
     padding: "12px 16px",
     textDecoration: "none",
     color: isActive ? "#0b5fff" : "#2d3748",
@@ -36,12 +35,6 @@ export default function Sidebar() {
         <NavLink to="returns" style={linkStyle}>Returns</NavLink>
         <NavLink to="orders" style={linkStyle}>Orders</NavLink>
         <NavLink to="profile" style={linkStyle}>Profile</NavLink>
-
-        {/* ✅ New Barcode Scanner Link */}
-        <NavLink to="barcode-scanner" style={linkStyle}>
-          <FaBarcode size={18} />
-          <span>Barcode Scanner</span>
-        </NavLink>
       </nav>
 
       <div style={{ marginTop: 28, fontSize: 12, color: "#94a3b8" }}>
