@@ -1,3 +1,2 @@
-literal: REMOVED_SECRET...0mcA
-
+literal: REMOVED_SECRETproj-usRDS
 replace: <REMOVED_API_KEY>
