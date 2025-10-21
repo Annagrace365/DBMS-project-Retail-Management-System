@@ -22,6 +22,7 @@ from .serializers import OrderItemSerializer
 from .serializers import PaymentSerializer  
 import os
 import openai
+
 # ---------- LOGIN ----------
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -492,7 +493,7 @@ def create_user(request):
     return Response({"success": True, "user": serializer.data}, status=201)
 
 
-openai.api_key = os.getenv("REMOVED_SECRETproj-usRDS-BOxj2i7t6o4MnCX6OagAo_LBXcgWYfuLewCqHpV8GO5KfA1vQKJRDRnuwHSFqfR-36b6T3BlbkFJonHKVfjH37sQMs2fU1chLvdba_guCtT2S0nDN9xUTIxQi-BdLvn_Jm7_shFRHE1ExqMFIC0mcA")
+openai.api_key = os.getenv("openai_key")
 @api_view(["GET"])
 @permission_classes([AllowAny])
 @authentication_classes([])
